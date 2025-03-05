@@ -1,42 +1,26 @@
 import asyncio
 import pygame
+import socket
+import aioconsole
 
 # Initialize Pygame
 pygame.init()
 
-# Server settings
-HOST = '127.0.0.1'
-PORT = 8888
-
-async def send_message(message):
-    reader, writer = await asyncio.open_connection(HOST, PORT)
-
-    print(f'Sending: {message}')
-    writer.write(message.encode())
-
-    data = await reader.read(100)
-    print(f'Received: {data.decode()}')
-
-    print("Closing the connection.")
-    writer.close()
-
-async def handle_incoming_messages():
-    reader, writer = await asyncio.open_connection(HOST, PORT)
+async def inputs(writer):
     while True:
-        data = await reader.read(100)
-        if data:
-            message = data.decode()
-            print(message)  # Display the message in the console
-        else:
-            break
+        msgin = await aioconsole.ainput()
+        writer.write(msgin.encode())
+        await writer.drain()
+
+async def receive(reader):
+    while True:
+        data = await reader.read(1024)
+        print(data.decode())
 
 async def main():
-    # Start listening for incoming messages
-    asyncio.create_task(handle_incoming_messages())
-    message = "Hello, Server!"
-    await send_message(message)
+    reader, writer = await asyncio.open_connection(host="10.5.1.2", port=13337)
+    if(await asyncio.gather(receive(reader), inputs(writer)) == 1):
+        exit(1)
 
-
-# Run the client
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

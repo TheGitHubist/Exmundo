@@ -1,47 +1,35 @@
 import asyncio
 import pygame
+import socket
 
 # Initialize Pygame
 pygame.init()
 
-# Server settings
-HOST = '127.0.0.1'
-PORT = 8888
+async def handle_client_msg(reader, writer):
+    while True:
 
-connected_clients = []  # List to keep track of connected clients
+        addr = writer.get_extra_info('peername')
+        data = await reader.read(1024)
+        if data == b'':
+            break
 
-async def handle_client(reader, writer):
-    connected_clients.append(writer)  # Add new client to the list
+        message = data.decode()
+        print(f"Message Received from {addr[0]}:{addr[1]} : {message!r}")
 
-    data = await reader.read(100)
-    message = data.decode()
-    addr = writer.get_extra_info('peername')
+        writer.write(f"Hello client ! Received <{message!r}>".encode())
+        await writer.drain()
 
-    print(f"Received {message} from {addr}")
-
-    print("Sending response back to the client.")
-    writer.write(data)
-    await writer.drain()
-
-    # Notify all clients that a new user has connected
-    message = "Someone is connected"
-    for client in connected_clients:
-        client.write(message.encode())
-        await client.drain()
-
-    print("Closing the connection.")
-
-    writer.close()
 
 async def main():
-    server = await asyncio.start_server(handle_client, HOST, PORT)
 
-    addr = server.sockets[0].getsockname()
-    print(f'Serving on {addr}')
+    server = await asyncio.start_server(handle_client_msg, '', 13337)
+
+    addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
+    print(f'Run on Port:13337')
 
     async with server:
         await server.serve_forever()
 
-# Run the server
-if __name__ == '__main__':
+if __name__ == "__main__":
+
     asyncio.run(main())
