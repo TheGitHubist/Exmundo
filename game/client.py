@@ -1,7 +1,8 @@
 import asyncio
 import pygame
 
-# Initialize Pygame
+port = 3945
+host = "10.5.1.44"
 pygame.init()
 
 # async def inputs(writer):
@@ -16,7 +17,7 @@ async def receive(reader):
         print(data.decode())
 
 async def main():
-    reader, writer = await asyncio.open_connection(host="10.5.1.44", port=3945)
+    reader, writer = await asyncio.open_connection(host, port)
     if(await asyncio.gather(receive(reader)) == 1):
         exit(1)
 
