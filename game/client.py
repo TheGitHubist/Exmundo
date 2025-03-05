@@ -55,6 +55,6 @@ if __name__ == "__main__":
             exit(1)
     #loop.run_until_complete(c.main())
 
-def main_game(client):
+async def main_game(client):
     client.message = "azerty"
 
