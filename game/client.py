@@ -21,40 +21,59 @@ class client:
     #         data = await reader.read(1024)
     #         print(data.decode())
 
-    async def main(self):
-        reader, writer = await asyncio.open_connection(self.host, self.port)
+    # async def main(self):
+    #     reader, writer = await asyncio.open_connection(self.host, self.port)
         
-        writer.write(b"Salut")
-        await writer.drain()
+    #     writer.write(b"Salut")
+    #     await writer.drain()
 
-        message = 10
+    #     message = 10
 
+    #     while True:
+    #         data = await reader.read(1024)
+
+    #         if not data:
+    #             raise Exception("socket closed")
+
+    #         print(f"Received: {data.decode()!r}")
+
+    #         if message > 0:
+    #             await asyncio.sleep(1)
+    #             writer.write(f"{self.message}".encode())
+    #             self.message = ""
+    #             await writer.drain()
+    #             message -= 1
+    #         else:
+    #             writer.write(b"quit")
+    #             await writer.drain()
+    #             break
+
+    async def inputs(self, writer):
+        while True:
+            writer.write(self.message.encode())
+            self.message = ""
+            await writer.drain()
+
+    async def receive(self, reader):
         while True:
             data = await reader.read(1024)
+            print(data.decode())
 
-            if not data:
-                raise Exception("socket closed")
-
-            print(f"Received: {data.decode()!r}")
-
-            if message > 0:
-                await asyncio.sleep(1)
-                writer.write(f"{self.message}".encode())
-                self.message = ""
-                await writer.drain()
-                message -= 1
-            else:
-                writer.write(b"quit")
-                await writer.drain()
-                break
-
-if __name__ == "__main__":
-    c = client("Salut")
-    loop = asyncio.new_event_loop()
-    if(await asyncio.gather(c.main(), main_game(c)) == 1):
+    async def main(self):
+        reader, writer = await asyncio.open_connection(host, port)
+        if(await asyncio.gather(self.inputs(writer),self.receive(reader)) == 1):
             exit(1)
-    #loop.run_until_complete(c.main())
+
+
+
+
 
 async def main_game(client):
     client.message = "azerty"
+        
+
+if __name__ == "__main__":
+    asyncio.run(self.main())
+    c = client("Salut")
+    c.message("Tu vas Bien ?")
 
