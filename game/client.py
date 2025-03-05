@@ -32,6 +32,6 @@ class client:
 #     c = client("Salut")
 #     c.message("Tu vas Bien ?")
 
-sio = socketio.AsyncSimpleClient()
-await sio.connect('10.5.1.44:3945')
+sio = socketio.SimpleClient()
+sio.connect('10.5.1.44:3945')
 
