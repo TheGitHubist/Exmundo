@@ -15,8 +15,3 @@ class deck:
         for card in card_list:
             data_card = json.load(open('./game/data/Cards.json'))
             self.card_list.append(data_card['cards'][card])
-
-
-dk = deck(1)
-
-print(dk.card_list)
