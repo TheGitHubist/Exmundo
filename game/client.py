@@ -21,7 +21,7 @@ class client:
             data = await reader.read(1024)
             print(data.decode())
 
-    async def main():
+    async def main(self):
         reader, writer = await asyncio.open_connection(self.host, self.port)
         if(await asyncio.gather(self.inputs(writer),self.receive(reader)) == 1):
             exit(1)
