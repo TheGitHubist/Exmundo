@@ -3,11 +3,13 @@ import pygame
 
 port = 3945
 host = "10.5.1.44"
+message = ""
 pygame.init()
 
 async def inputs(writer):
-        #msgin = await aioconsole.ainput()
-        writer.write(host.encode())
+    while True:
+        writer.write(massage.encode())
+        message = ""
         await writer.drain()
 
 async def receive(reader):
