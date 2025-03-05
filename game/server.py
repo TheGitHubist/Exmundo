@@ -1,6 +1,5 @@
 import asyncio
 import pygame
-import socket
 
 # Initialize Pygame
 pygame.init()
