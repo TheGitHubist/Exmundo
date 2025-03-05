@@ -28,4 +28,4 @@ class client:
 
 if __name__ == "__main__":
     c = client("Salut")
-    asyncio.run(main())
+    asyncio.run(c.main())
