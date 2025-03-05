@@ -6,11 +6,12 @@ host = "10.5.1.44"
 message = ""
 pygame.init()
 
-async def inputs(writer):
+async def inputs(writer, message):
     while True:
-        writer.write(massage.encode())
-        message = ""
-        await writer.drain()
+        if message != "":
+            writer.write(massage.encode())
+            message = ""
+            await writer.drain()
 
 async def receive(reader):
     while True:
@@ -19,7 +20,7 @@ async def receive(reader):
 
 async def main():
     reader, writer = await asyncio.open_connection(host, port)
-    if(await asyncio.gather(inputs(writer),receive(reader)) == 1):
+    if(await asyncio.gather(inputs(writer, message),receive(reader, message)) == 1):
         exit(1)
 
 if __name__ == "__main__":
