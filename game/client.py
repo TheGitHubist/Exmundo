@@ -47,11 +47,8 @@ class client:
                 await writer.drain()
                 break
 
-    async def run(self):
-        loop = asyncio.new_event_loop()
-        loop.run_until_complete(self.main())
-
 if __name__ == "__main__":
     c = client("Salut")
-    c.run()
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(c.main())
 
