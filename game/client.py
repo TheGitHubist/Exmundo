@@ -53,5 +53,5 @@ class client:
 
 if __name__ == "__main__":
     c = client("Salut")
-    c.message("Tu vas Bien ?")
+    c.run()
 
