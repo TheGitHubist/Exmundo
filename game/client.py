@@ -18,7 +18,8 @@ async def receive(reader):
 
 async def main():
     reader, writer = await asyncio.open_connection(host, port)
-    if(await asyncio.gather(inputs(writer),receive(reader)) == 1):
+    inputs(writer)
+    if(await asyncio.gather(receive(reader)) == 1):
         exit(1)
 
 if __name__ == "__main__":
