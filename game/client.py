@@ -12,7 +12,7 @@ class client:
     async def inputs(self, writer):
         while True:
             if self.message != "":
-                writer.write(self.massage.encode())
+                writer.write(self.message.encode())
                 self.message = ""
                 await writer.drain()
 
