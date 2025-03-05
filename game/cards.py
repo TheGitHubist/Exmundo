@@ -1,10 +1,13 @@
 from abc import ABC, abstractmethod
+import pygame
 
 class CardModel(ABC):
     def __init__(self, name, image, effects):
         self.name = name
         self.image = image
         self.effects = effects
+        self.hidden = False
+        self.rect = pygame.Rect(600, 30, 60, 90)
 
     @abstractmethod
     def activate(self):
@@ -13,6 +16,48 @@ class CardModel(ABC):
     def activate_effects(self, target):
         for effect in self.effects:
             effect.activate(self)
+    
+    def flip(self):
+        if self.hidden:
+            self.image = pygame.image.load(self.get_link()).convert_alpha()
+            self.image = pygame.transform.scale(self.image, (60, 90))
+            self.hidden = False
+
+    def move(self, x, y):
+        self.rect.topleft = (x, y)
+    
+    def get_link(self):
+        link = []
+        link.append("BlackJack/src/images/big/")
+    
+        if 1 < self.get_value() < 10:
+            link.append(str(self.get_value()))
+        else:
+            name = self.get_name()
+            if name == "10":
+                link.append("10")
+            elif name == "J":
+                link.append("j")
+            elif name == "Q":
+                link.append("q")
+            elif name == "K":
+                link.append("k")
+            elif name == "A":
+                link.append("ace")
+    
+        color = self.get_color()
+        if color == 1:
+            link.append("Clubs")
+        elif color == 2:
+            link.append("Dimonds")
+        elif color == 3:
+            link.append("Hearts")
+        elif color == 4:
+            link.append("Spades")
+    
+        link.append("Big.png")
+        print(''.join(link))
+        return ''.join(link)
 
 class MonsterCardModel(CardModel):
     def __init__(self, name, image, health, damage, effects):
