@@ -40,7 +40,6 @@ class client:
             if message > 0:
                 await asyncio.sleep(1)
                 writer.write(f"{self.message}".encode())
-                self.message = ""
                 await writer.drain()
                 message -= 1
             else:
