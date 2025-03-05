@@ -20,10 +20,22 @@ async def send_message(message):
     print("Closing the connection.")
     writer.close()
 
+async def handle_incoming_messages():
+    reader, writer = await asyncio.open_connection(HOST, PORT)
+    while True:
+        data = await reader.read(100)
+        if data:
+            message = data.decode()
+            print(message)  # Display the message in the console
+        else:
+            break
+
 async def main():
-    # Example message to send
+    # Start listening for incoming messages
+    asyncio.create_task(handle_incoming_messages())
     message = "Hello, Server!"
     await send_message(message)
+
 
 # Run the client
 if __name__ == '__main__':

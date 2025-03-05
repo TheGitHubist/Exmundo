@@ -8,7 +8,11 @@ pygame.init()
 HOST = '127.0.0.1'
 PORT = 8888
 
+connected_clients = []  # List to keep track of connected clients
+
 async def handle_client(reader, writer):
+    connected_clients.append(writer)  # Add new client to the list
+
     data = await reader.read(100)
     message = data.decode()
     addr = writer.get_extra_info('peername')
@@ -19,7 +23,14 @@ async def handle_client(reader, writer):
     writer.write(data)
     await writer.drain()
 
+    # Notify all clients that a new user has connected
+    message = "Someone is connected"
+    for client in connected_clients:
+        client.write(message.encode())
+        await client.drain()
+
     print("Closing the connection.")
+
     writer.close()
 
 async def main():
