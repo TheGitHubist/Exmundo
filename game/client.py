@@ -1,4 +1,5 @@
 import asyncio
+import socketio
 import pygame
 
 pygame.init()
@@ -8,7 +9,6 @@ class client:
         self.port = 3945
         self.host = "10.5.1.44"
         self.message = message
-        asyncio.run(self.main())
 
     async def inputs(self, writer):
         while True:
@@ -25,7 +25,13 @@ class client:
         if(await asyncio.gather(self.inputs(writer),self.receive(reader)) == 1):
             exit(1)
 
-if __name__ == "__main__":
-    c = client("Salut")
-    c.message("Tu vas Bien ?")
+    async def run(self):
+        asyncio.run(self.main())
+
+# if __name__ == "__main__":
+#     c = client("Salut")
+#     c.message("Tu vas Bien ?")
+
+sio = socketio.AsyncSimpleClient()
+await sio.connect('10.5.1.44:3945')
 
