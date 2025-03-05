@@ -1,0 +1,76 @@
+{
+    "cards": [{
+        "name": "a",
+        "atk": 100,
+        "pv": 10,
+        "rune":0,
+        "type": 10,
+        "effect": null,
+        "cost": null,
+        "art": ""
+        },{
+        "name": "b",
+        "atk": 100,
+        "pv": 100,
+        "rune":0,
+        "type": 11,
+        "effect": null,
+        "cost": 1,
+        "art": ""
+        },{
+        "name": "c",
+        "atk": null,
+        "pv": null,
+        "rune":null,
+        "type":null,
+        "effect": 0,
+        "cost": null,
+        "art": ""
+        },{
+        "name": "d",
+        "atk": null,
+        "pv": null,
+        "rune":null,
+        "type":null,
+        "effect": 0,
+        "cost": null,
+        "art": ""
+        },{
+        "name": "e",
+        "atk": null,
+        "pv": null,
+        "rune":null,
+        "type":null,
+        "effect": 0,
+        "cost": null,
+        "art": ""
+        },{
+        "name": "f",
+        "atk": null,
+        "pv": null,
+        "rune":null,
+        "type":null,
+        "effect": 0,
+        "cost": null,
+        "art": ""
+        },{
+        "name": "g",
+        "atk": null,
+        "pv": null,
+        "rune":null,
+        "type":null,
+        "effect": 0,
+        "cost": null,
+        "art": ""
+        },{
+        "name": "h",
+        "atk": null,
+        "pv": null,
+        "rune":null,
+        "type":null,
+        "effect": 0,
+        "cost": null,
+        "art": ""
+        }
+    ]
+}
