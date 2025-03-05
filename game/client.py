@@ -60,7 +60,7 @@ class client:
             print(data.decode())
 
     async def main(self):
-        reader, writer = await asyncio.open_connection(host, port)
+        reader, writer = await asyncio.open_connection(self.host, self.port)
         if(await asyncio.gather(self.inputs(writer),self.receive(reader)) == 1):
             exit(1)
 
@@ -73,7 +73,6 @@ async def main_game(client):
         
 
 if __name__ == "__main__":
-    asyncio.run(self.main())
     c = client("Salut")
-    c.message("Tu vas Bien ?")
+    asyncio.run(c.main())
 
