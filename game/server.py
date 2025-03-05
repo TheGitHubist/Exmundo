@@ -1,8 +1,9 @@
 import asyncio
 import pygame
 
-# Initialize Pygame
+port = 3945
 pygame.init()
+
 
 async def handle_client_msg(reader, writer):
     while True:
@@ -21,10 +22,10 @@ async def handle_client_msg(reader, writer):
 
 async def main():
 
-    server = await asyncio.start_server(handle_client_msg, '', 13337)
+    server = await asyncio.start_server(handle_client_msg, '', port)
 
     addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
-    print(f'Run on Port:13337')
+    print(f'Run on Port:{port}')
 
     async with server:
         await server.serve_forever()
