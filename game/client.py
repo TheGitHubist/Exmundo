@@ -8,6 +8,7 @@ class client:
         self.port = 3945
         self.host = "10.5.1.44"
         self.message = message
+        asyncio.run(self.main())
 
     async def inputs(self, writer):
         while True:
@@ -28,4 +29,5 @@ class client:
 
 if __name__ == "__main__":
     c = client("Salut")
-    asyncio.run(c.main())
+    c.message("Tu vas Bien ?")
+
