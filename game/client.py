@@ -50,8 +50,11 @@ class client:
 
     async def inputs(self, writer):
         while True:
-            writer.write((self.message).encode())
+            writer.write(self.message.encode())
+            self.message = ""
+            await asyncio.sleep(1)
             await writer.drain()
+            
 
     async def receive(self, reader):
         while True:
