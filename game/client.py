@@ -10,6 +10,7 @@ async def inputs(writer):
         #msgin = await aioconsole.ainput()
         writer.write(host.encode())
         await writer.drain()
+        exit
 
 async def receive(reader):
     while True:
@@ -18,8 +19,7 @@ async def receive(reader):
 
 async def main():
     reader, writer = await asyncio.open_connection(host, port)
-    inputs(writer)
-    if(await asyncio.gather(receive(reader)) == 1):
+    if(await asyncio.gather(inputs(writer),receive(reader)) == 1):
         exit(1)
 
 if __name__ == "__main__":
