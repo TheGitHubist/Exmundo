@@ -29,7 +29,8 @@ class CardModel(ABC):
     def get_link(self):
         link = []
         link.append("Exmundo/images/")
-        link.append("Big.png")
+        link.append(self.get_name())
+        link.append(".png")
         print(''.join(link))
         return ''.join(link)
     
