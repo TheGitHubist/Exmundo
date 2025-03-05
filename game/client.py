@@ -39,7 +39,8 @@ class client:
 
             if message > 0:
                 await asyncio.sleep(1)
-                writer.write(f"{time.time()}".encode())
+                writer.write(f"{self.message}".encode())
+                self.message = ""
                 await writer.drain()
                 message -= 1
             else:
@@ -51,4 +52,5 @@ if __name__ == "__main__":
     c = client("Salut")
     loop = asyncio.new_event_loop()
     loop.run_until_complete(c.main())
+    c.message = "c"
 
