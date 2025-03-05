@@ -51,6 +51,10 @@ class client:
 if __name__ == "__main__":
     c = client("Salut")
     loop = asyncio.new_event_loop()
-    loop.run_until_complete(c.main())
-    c.message = "c"
+    if(await asyncio.gather(c.main(), main_game(c)) == 1):
+            exit(1)
+    #loop.run_until_complete(c.main())
+
+def main_game(client):
+    client.message = "azerty"
 
