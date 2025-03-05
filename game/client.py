@@ -7,7 +7,7 @@ pygame.init()
 class client:
     def __init__(self, message):
         self.port = 3945
-        self.host = "10.5.1.44"
+        self.host = "10.5.1.1"
         self.message = message
 
     # async def inputs(self, writer):
@@ -63,7 +63,7 @@ class client:
 
     async def main(self):
         reader, writer = await asyncio.open_connection(self.host, self.port)
-        if(await asyncio.gather(self.inputs(writer),self.receive(reader), main_game(self)) == 1):
+        if(await asyncio.gather(self.inputs(writer),self.receive(reader), main_game(self)) == 1): #Changer le main_game()
             exit(1)
 
 
