@@ -8,7 +8,7 @@ class client:
     def __init__(self, message):
         self.port = 3945
         self.host = "10.5.1.44"
-        self.message = ""
+        self.message = message
 
     # async def inputs(self, writer):
     #     while True:
