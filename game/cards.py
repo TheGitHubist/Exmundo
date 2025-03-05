@@ -1,7 +1,22 @@
 from abc import ABC, abstractmethod
 
-class MonsterCardModel(ABC):
-    def __init__(self, name, health, damage, effects):
+class CardModel(ABC):
+    def __init__(self, name, image, effects):
+        self.name = name
+        self.image = image
+        self.effects = effects
+
+    @abstractmethod
+    def activate(self):
+        pass
+
+    def activate_effects(self, target):
+        for effect in self.effects:
+            effect.activate(self)
+
+class MonsterCardModel(CardModel):
+    def __init__(self, name, image, health, damage, effects):
+        super().__init__(name, image, effects)
         self.name = name
         self.health = health
         self.damage = damage
@@ -25,16 +40,16 @@ class MonsterCardModel(ABC):
         pass
 
 class BasicMonsterCard(MonsterCardModel):
-    def __init__(self, name, health, damage, effects, rune_possession):
-        super().__init__(name, health, damage, effects)
+    def __init__(self, name, image, health, damage, effects, rune_possession):
+        super().__init__(name, image, health, damage, effects)
         self.rune_possession = rune_possession
 
     def attack(self, other):
         other.lose_health(self.damage)
 
 class EliteMonsterCard(MonsterCardModel):
-    def __init__(self, name, health, damage, effects, rune_possession, rune_cost):
-        super().__init__(name, health, damage, effects)
+    def __init__(self, name, image, health, damage, effects, rune_possession, rune_cost):
+        super().__init__(name, image, health, damage, effects)
         self.rune_possession = rune_possession
         self.rune_cost = rune_cost
         
@@ -42,16 +57,17 @@ class EliteMonsterCard(MonsterCardModel):
         other.lose_health(self.damage)
 
 class BossMonsterCard(MonsterCardModel):
-    def __init__(self, name, health, damage, effects, rune_possession, rune_cost):
-        super().__init__(name, health, damage, effects)
+    def __init__(self, name, image, health, damage, effects, rune_possession, rune_cost):
+        super().__init__(name, image, health, damage, effects)
         self.rune_possession = rune_possession
         self.rune_cost = rune_cost
         
     def attack(self, other):
         other.lose_health(self.damage)
 
-class SpellCardModel(ABC):
-    def __init__(self, name, effects):
+class SpellCardModel(CardModel):
+    def __init__(self, name, image, effects):
+        super().__init__(name, image, effects)
         self.name = name
         self.effects = effects
     
@@ -64,8 +80,8 @@ class SpellCardModel(ABC):
             effect.activate(self)
 
 class LinkSpellCard(SpellCardModel):
-    def __init__(self, name, effects, position, pointed_zones):
-        super().__init__(name, effects)
+    def __init__(self, name, image, effects, position, pointed_zones):
+        super().__init__(name, image, effects)
         self.position = position
         self.pointed_zones = pointed_zones
 
@@ -74,16 +90,16 @@ class LinkSpellCard(SpellCardModel):
             self.activate_effects(cards)
 
 class AuraSpellCard(SpellCardModel):
-    def __init__(self, name, effects, position):
-        super().__init__(name, effects)
+    def __init__(self, name, image, effects, position):
+        super().__init__(name, image, effects)
         self.position = position
 
     def activate(self):
         self.activate_effects()
 
 class FieldSpellCard(SpellCardModel):
-    def __init__(self, name, effects, field):
-        super().__init__(name, effects)
+    def __init__(self, name, image, effects, field):
+        super().__init__(name, image, effects)
         self.field = field
 
     def activate(self):
@@ -91,8 +107,8 @@ class FieldSpellCard(SpellCardModel):
             self.activate_effects(cards)
 
 class NormalSpellCard(SpellCardModel):
-    def __init__(self, name, effects):
-        super().__init__(name, effects)
+    def __init__(self, name, image, effects):
+        super().__init__(name, image, effects)
 
     def activate(self):
         self.activate_effects()
