@@ -24,6 +24,7 @@ class client:
     async def main(self):
         reader, writer = await asyncio.open_connection(self.host, self.port)
         
+        writer.write(b"Salut")
         await writer.drain()
 
         message = 10
