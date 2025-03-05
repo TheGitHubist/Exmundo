@@ -3,7 +3,11 @@ class Turn:
         self.player = player
     
     def drawPhase(self):
-        pass
+        if self.player.deck:
+            card = self.player.deck.pop(0)
+            self.player.hand.append(card)
+            return card
+        return None
 
     def battleMonsters(self):
         pass
