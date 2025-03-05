@@ -63,7 +63,7 @@ class client:
 
     async def main(self):
         reader, writer = await asyncio.open_connection(self.host, self.port)
-        if(await asyncio.gather(self.inputs(writer),self.receive(reader)) == 1):
+        if(await asyncio.gather(self.inputs(writer),self.receive(reader), main_game(self)) == 1):
             exit(1)
 
 
