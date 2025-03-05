@@ -1,10 +1,13 @@
 from abc import ABC, abstractmethod
+import pygame
 
 class CardModel(ABC):
     def __init__(self, name, image, effects):
         self.name = name
         self.image = image
         self.effects = effects
+        self.hidden = False
+        self.rect = pygame.Rect(600, 30, 60, 90)
 
     @abstractmethod
     def activate(self):
@@ -13,6 +16,26 @@ class CardModel(ABC):
     def activate_effects(self, target):
         for effect in self.effects:
             effect.activate(self)
+    
+    def flip(self):
+        if self.hidden:
+            self.image = pygame.image.load(self.get_link()).convert_alpha()
+            self.image = pygame.transform.scale(self.image, (60, 90))
+            self.hidden = False
+
+    def move(self, x, y):
+        self.rect.topleft = (x, y)
+    
+    def get_link(self):
+        link = []
+        link.append("Exmundo/images/")
+        link.append(self.get_name())
+        link.append(".png")
+        print(''.join(link))
+        return ''.join(link)
+    
+    def get_name(self):
+        return self.name
 
 class MonsterCardModel(CardModel):
     def __init__(self, name, image, health, damage, effects):
