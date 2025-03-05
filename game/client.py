@@ -12,10 +12,8 @@ class client:
 
     async def inputs(self, writer):
         while True:
-            if self.message != "":
-                writer.write(self.message.encode())
-                self.message = ""
-                await writer.drain()
+            writer.write(self.message.encode())
+            await writer.drain()
 
     async def receive(self, reader):
         while True:
