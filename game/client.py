@@ -6,11 +6,9 @@ host = "10.5.1.44"
 pygame.init()
 
 async def inputs(writer):
-    while True:
         #msgin = await aioconsole.ainput()
         writer.write(host.encode())
         await writer.drain()
-        exit
 
 async def receive(reader):
     while True:
