@@ -50,8 +50,7 @@ class client:
 
     async def inputs(self, writer):
         while True:
-            writer.write(self.message.encode())
-            self.message = ""
+            writer.write((self.message).encode())
             await writer.drain()
 
     async def receive(self, reader):
