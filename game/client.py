@@ -52,6 +52,7 @@ class client:
         while True:
             writer.write(self.message.encode())
             self.message = ""
+            await asyncio.sleep(1)
             await writer.drain()
             
 
