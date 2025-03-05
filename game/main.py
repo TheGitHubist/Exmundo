@@ -1,22 +1,22 @@
 import pygame as pg
 import asyncio
-from game.client import send_message
+#from client import send_message
 
 from pathlib import Path
 
 def main():
-    connection_status = ""  # Variable to hold connection status messages
+    connection_status = ""
 
     pg.init()
     screen = pg.display.set_mode((1500, 900))
     running = True
-    asyncio.set_event_loop(asyncio.new_event_loop())  # Set up a new event loop for asyncio
+    asyncio.set_event_loop(asyncio.new_event_loop())
 
     while running:
         for event in pg.event.get(): 
-            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:  # Check for spacebar press
-                connection_status = "You are connected"  # Update connection status
-                asyncio.create_task(send_message("Hello, Server!"))  # Send message to server
+            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                connection_status = "You are connected"
+                #asyncio.create_task(send_message("Hello, Server!"))
 
             if event.type == pg.QUIT:
                 running = False
