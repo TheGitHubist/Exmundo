@@ -160,7 +160,7 @@ class GameClient:
             pygame.quit()
 
 async def main():
-    client = GameClient("10.5.1.1", 3945)
+    client = GameClient("10.5.1.2", 3945)
     await client.main()
 
 if __name__ == "__main__":
