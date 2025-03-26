@@ -70,41 +70,17 @@ class GameServer:
                     break
 
                 message = data.decode()
+
                 print(f"Received message from player {player_number}: {message}")
-                
+
+                if(message.split()[0] == "569" and player_number == 1):
+                    self.game_manager.player1_deck.choice_deck(message.split()[1])
+                elif(message.split()[0] == "569" and player_number == 2):
+                    self.game_manager.player2_deck.choice_deck(message.split()[1])
+
                 if message == "draw_card":
                     if self.game_manager.is_player_turn(player_number):
-                        # For testing, use available card images
-                        if self.available_cards:
-                            # Create a unique card by combining the base card with a unique identifier
-                            card_index = player_number % len(self.available_cards)
-                            print("_______________________________________________________________________")
-                            print(card_index)
-                            print("_______________________________________________________________________")
-                            base_card_name = self.available_cards[card_index]
-                            unique_id = f"{player_number}_{len(self.available_cards)}_{card_index}"
-                            card = {
-                                "art": base_card_name,
-                                "name": f"{base_card_name.split('.')[0]}_{unique_id}",  # Unique name
-                                "id": unique_id  # Add unique identifier
-                            }
-                            print(f"Drawing unique card for player {player_number}: {card}")
-                            print(f"Using card index {card_index}: {base_card_name}")
-                            print(f"Card full path: {self.images_path / base_card_name}")
-                            
-                            # Test load the image before sending
-                            try:
-                                test_image = pygame.image.load(str(self.images_path / base_card_name))
-                                print(f"Successfully loaded test image before sending: {test_image.get_size()}")
-                            except Exception as e:
-                                print(f"Error loading test image before sending: {e}")
-                            
-                            # Notify both players about the card draw
-                            response = json.dumps({
-                                "type": "card_drawn",
-                                "player": player_number,
-                                "card": card
-                            })
+#
                             print(f"Sending card data: {response}")
                             
                             # Send to all players and wait for each to complete

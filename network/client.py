@@ -4,10 +4,13 @@ import pygame
 import json
 from pathlib import Path
 
+from game.player import Player
+
 pygame.init()
 
 class GameClient:
     def __init__(self, host, port):
+        self.deck_choice = 0
         self.host = host
         self.port = port
         self.player_number = None
@@ -17,6 +20,7 @@ class GameClient:
         self.draw_animation_duration = 500  # milliseconds
         self.initial_cards_drawn = False  # Track if initial cards have been drawn
         self.game_started = False  # Track if game has started
+        self
         
         # Get screen info and set up display
         info = pygame.display.Info()
@@ -231,6 +235,7 @@ class GameClient:
         pygame.display.flip()
 
     async def handle_input(self, writer):
+        writer.write(f"569 {self.deck_choice}".encode())
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False

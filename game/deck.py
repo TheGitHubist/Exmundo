@@ -1,5 +1,6 @@
 import random
 from .cards import CardModel
+from .player import DeckCard
 
 class Deck:
     def __init__(self, cards=None):
@@ -33,6 +34,7 @@ class Deck:
         return len(self.cards)
 
 class PlayerDeck(Deck):
+    self.deckcard = DeckCard(0)
     def __init__(self, cards=None):
         super().__init__(cards)
         self.hand = []
@@ -57,3 +59,17 @@ class PlayerDeck(Deck):
             self.hand.remove(card)
             return True
         return False 
+
+    def choice_deck(self, choice):
+        self.deckcard = DeckCard(choice)
+
+class DeckCard:
+    card_list = []
+    def __init__(self, index):
+        data_list = json.load(open('./game/data/Decks.json'))
+        card_list = data_list['deck'][index]['cards']
+        for card in card_list:
+            data_card = json.load(open('./game/data/Cards.json'))
+            if data_card['cards'][card]['art'] == "":
+                data_card['cards'][card]['art'] = "./images/Error.png"
+            self.card_list.append(data_card['cards'][card])
