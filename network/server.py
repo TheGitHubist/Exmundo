@@ -1,9 +1,14 @@
 import asyncio
 import pygame
 import json
+import sys
+from pathlib import Path
+
+# Add the parent directory to the Python path
+sys.path.append(str(Path(__file__).parent.parent))
+
 from game.deck import PlayerDeck
 from game.game_manager import GameManager
-from pathlib import Path
 
 port = 3945
 pygame.init()
