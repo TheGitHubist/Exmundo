@@ -35,12 +35,17 @@ class GameClient:
         self.running = True
         self.images_path = Path(__file__).parent.parent / 'images'
         print(f"Client images path: {self.images_path}")
+        print(f"Images path exists: {self.images_path.exists()}")
+        
         # Check if images directory exists and has files
         if not self.images_path.exists():
             print(f"ERROR: Images directory not found at {self.images_path}")
         else:
             available_images = list(self.images_path.glob('*.png'))
             print(f"Available images in directory: {[f.name for f in available_images]}")
+            for img in available_images:
+                print(f"Image {img.name} exists: {img.exists()}")
+                print(f"Image {img.name} is file: {img.is_file()}")
 
     def handle_resize(self, event):
         """Handle window resize events"""
@@ -90,16 +95,24 @@ class GameClient:
                 try:
                     image_path = self.images_path / card["art"]
                     print(f"Attempting to load image from: {image_path}")
+                    print(f"Image path exists: {image_path.exists()}")
+                    print(f"Image path is file: {image_path.is_file()}")
+                    
                     if not image_path.exists():
                         print(f"ERROR: Image file not found at {image_path}")
                         continue
+                        
                     card_image = pygame.image.load(str(image_path))
+                    print(f"Successfully loaded image: {card_image.get_size()}")
+                    
                     card_image = pygame.transform.scale(card_image, (self.card_width, self.card_height))
+                    print(f"Scaled image size: {card_image.get_size()}")
                     
                     # Calculate card position
                     x_pos = padding + (player - 1) * card_spacing
                     y_pos = int(self.window_height * 0.3) if player == 1 else int(self.window_height * 0.6)
                     
+                    print(f"Drawing card at position: ({x_pos}, {y_pos})")
                     self.screen.blit(card_image, (x_pos, y_pos))
                     print(f"Successfully drew card for player {player}")
                 except Exception as e:

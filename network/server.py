@@ -20,11 +20,18 @@ class GameServer:
         self.game_started = False
         self.images_path = Path(__file__).parent.parent / 'images'
         print(f"Server images path: {self.images_path}")
+        print(f"Images path exists: {self.images_path.exists()}")
+        
         # Load available card images
         self.available_cards = [f.name for f in self.images_path.glob('*.png')]
         print(f"Available cards: {self.available_cards}")
         if not self.available_cards:
             print("WARNING: No card images found!")
+        else:
+            for card in self.available_cards:
+                card_path = self.images_path / card
+                print(f"Card {card} exists: {card_path.exists()}")
+                print(f"Card {card} is file: {card_path.is_file()}")
 
     async def handle_client_msg(self, reader, writer):
         addr = writer.get_extra_info('peername')
@@ -61,10 +68,13 @@ class GameServer:
                     if self.game_manager.is_player_turn(player_number):
                         # For testing, use available card images
                         if self.available_cards:
+                            card_index = player_number % len(self.available_cards)
+                            card_name = self.available_cards[card_index]
                             card = {
-                                "art": self.available_cards[player_number % len(self.available_cards)]
+                                "art": card_name
                             }
                             print(f"Drawing card for player {player_number}: {card}")
+                            print(f"Using card index {card_index}: {card_name}")
                             
                             # Notify both players about the card draw
                             response = json.dumps({
