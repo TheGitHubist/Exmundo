@@ -96,12 +96,19 @@ class GameClient:
         except json.JSONDecodeError:
             if message == "Game started":
                 print("Game has started!")
-            elif(message == "Not Player"):
+                # Start drawing initial cards after a short delay to ensure player numbers are set
+                await asyncio.sleep(0.5)
+                if self.player_number is not None:
+                    await self.draw_initial_cards(writer)
+            elif message == "Not Player":
                 print("Player disconnected")
-                quit()
+                self.running = False
             elif message.startswith("Player"):
                 self.player_number = int(message.split()[1])
                 print(f"You are Player {self.player_number}")
+                # If game has already started, draw initial cards
+                if self.game_started:
+                    await self.draw_initial_cards(writer)
 
     def draw_card_with_animation(self, card_image, start_pos, end_pos, progress):
         """Draw a card with animation"""
@@ -121,23 +128,16 @@ class GameClient:
         if self.initial_cards_drawn:
             return
             
-        print("Starting initial card draw")
-        # Draw 5 cards for each player
+        print(f"Starting initial card draw for player {self.player_number}")
+        # Draw 5 cards for the current player
         for _ in range(5):
-            # Draw for player 1
-            print("Drawing initial card for player 1")
-            writer.write("draw_card".encode())
-            await writer.drain()
-            await asyncio.sleep(0.2)  # Small delay between draws
-            
-            # Draw for player 2
-            print("Drawing initial card for player 2")
+            print(f"Drawing initial card for player {self.player_number}")
             writer.write("draw_card".encode())
             await writer.drain()
             await asyncio.sleep(0.2)  # Small delay between draws
             
         self.initial_cards_drawn = True
-        print("Initial card draw complete")
+        print(f"Initial card draw complete for player {self.player_number}")
 
     async def draw_game_state(self):
         self.screen.fill((255, 255, 255))
