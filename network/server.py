@@ -1,35 +1,108 @@
 import asyncio
 import pygame
+import json
+from game.deck import PlayerDeck
+from game.game_manager import GameManager
+from pathlib import Path
 
 port = 3945
 pygame.init()
 
+class GameServer:
+    def __init__(self):
+        self.game_manager = GameManager()
+        self.connected_players = []
+        self.game_started = False
+        self.images_path = Path(__file__).parent.parent / 'images'
+        print(f"Server images path: {self.images_path}")
+        # Load available card images
+        self.available_cards = [f.name for f in self.images_path.glob('*.png')]
+        print(f"Available cards: {self.available_cards}")
+        if not self.available_cards:
+            print("WARNING: No card images found!")
 
-async def handle_client_msg(reader, writer):
-    while True:
-
+    async def handle_client_msg(self, reader, writer):
         addr = writer.get_extra_info('peername')
-        data = await reader.read(1024)
-        if data == b'':
-            break
+        player_number = len(self.connected_players) + 1
+        
+        if player_number > 2:
+            writer.write("Game is full".encode())
+            await writer.drain()
+            return
 
-        message = data.decode()
-        print(f"Message Received from {addr[0]}:{addr[1]} : {message!r}")
-
-        writer.write(f"Hello client ! Received <{message!r}>".encode())
+        self.connected_players.append((addr, writer))
+        writer.write(f"Player {player_number}".encode())
         await writer.drain()
+        print(f"Player {player_number} connected from {addr}")
 
+        if len(self.connected_players) == 2:
+            self.game_started = True
+            print("Game started with 2 players!")
+            # Notify both players that game has started
+            for _, writer in self.connected_players:
+                writer.write("Game started".encode())
+                await writer.drain()
+
+        while True:
+            try:
+                data = await reader.read(1024)
+                if data == b'':
+                    break
+
+                message = data.decode()
+                print(f"Received message from player {player_number}: {message}")
+                
+                if message == "draw_card":
+                    if self.game_manager.is_player_turn(player_number):
+                        # For testing, use available card images
+                        if self.available_cards:
+                            card = {
+                                "art": self.available_cards[player_number % len(self.available_cards)]
+                            }
+                            print(f"Drawing card for player {player_number}: {card}")
+                            
+                            # Notify both players about the card draw
+                            response = json.dumps({
+                                "type": "card_drawn",
+                                "player": player_number,
+                                "card": card
+                            })
+                            print(f"Sending card data: {response}")
+                            for _, writer in self.connected_players:
+                                writer.write(response.encode())
+                                await writer.drain()
+                                print("Card data sent to player")
+                        else:
+                            print("No cards available to draw!")
+                        
+                        self.game_manager.switch_player()
+                        # Notify both players about turn change
+                        turn_msg = json.dumps({
+                            "type": "turn_change",
+                            "current_player": self.game_manager.get_current_player()
+                        })
+                        for _, writer in self.connected_players:
+                            writer.write(turn_msg.encode())
+                            await writer.drain()
+
+            except Exception as e:
+                print(f"Error handling client {addr}: {e}")
+                break
+
+        self.connected_players.remove((addr, writer))
+        writer.close()
+        await writer.wait_closed()
+        print(f"Player {player_number} disconnected")
 
 async def main():
-
-    server = await asyncio.start_server(handle_client_msg, '', port)
-
+    game_server = GameServer()
+    server = await asyncio.start_server(game_server.handle_client_msg, '', port)
+    
     addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
-    print(f'Run on Port:{port}')
+    print(f'Server running on {addrs}')
 
     async with server:
         await server.serve_forever()
 
 if __name__ == "__main__":
-
     asyncio.run(main())
