@@ -61,9 +61,6 @@ class GameClient:
 
     async def handle_server_message(self, message):
         print(f"Received message: {message}")
-        # if(message == "Not Player"):
-        #     print("Player disconnected")
-        #     exit
         try:
             data = json.loads(message)
             if data["type"] == "card_drawn":
@@ -96,6 +93,9 @@ class GameClient:
         except json.JSONDecodeError:
             if message == "Game started":
                 print("Game has started!")
+            elif(message == "Not Player"):
+                print("Player disconnected")
+                quit()
             elif message.startswith("Player"):
                 self.player_number = int(message.split()[1])
                 print(f"You are Player {self.player_number}")
