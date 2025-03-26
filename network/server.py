@@ -32,6 +32,7 @@ class GameServer:
                 card_path = self.images_path / card
                 print(f"Card {card} exists: {card_path.exists()}")
                 print(f"Card {card} is file: {card_path.is_file()}")
+                print(f"Card {card} full path: {card_path.absolute()}")
 
     async def handle_client_msg(self, reader, writer):
         addr = writer.get_extra_info('peername')
@@ -71,10 +72,12 @@ class GameServer:
                             card_index = player_number % len(self.available_cards)
                             card_name = self.available_cards[card_index]
                             card = {
-                                "art": card_name
+                                "art": card_name,
+                                "name": card_name.split('.')[0]  # Add card name without extension
                             }
                             print(f"Drawing card for player {player_number}: {card}")
                             print(f"Using card index {card_index}: {card_name}")
+                            print(f"Card full path: {self.images_path / card_name}")
                             
                             # Notify both players about the card draw
                             response = json.dumps({

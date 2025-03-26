@@ -38,6 +38,7 @@ class GameClient:
         self.images_path = Path(__file__).parent.parent / 'images'
         print(f"Client images path: {self.images_path}")
         print(f"Images path exists: {self.images_path.exists()}")
+        print(f"Images path absolute: {self.images_path.absolute()}")
         
         # Check if images directory exists and has files
         if not self.images_path.exists():
@@ -48,6 +49,7 @@ class GameClient:
             for img in available_images:
                 print(f"Image {img.name} exists: {img.exists()}")
                 print(f"Image {img.name} is file: {img.is_file()}")
+                print(f"Image {img.name} full path: {img.absolute()}")
 
     def handle_resize(self, event):
         """Handle window resize events"""
@@ -64,6 +66,9 @@ class GameClient:
             if data["type"] == "card_drawn":
                 player = data["player"]
                 card = data["card"]
+                print(f"Received card data: {card}")
+                print(f"Card art path: {self.images_path / card['art']}")
+                print(f"Card art exists: {(self.images_path / card['art']).exists()}")
                 self.drawn_cards[player] = card
                 self.last_draw_time = pygame.time.get_ticks()  # Start animation
                 print(f"Card drawn for player {player}: {card}")
@@ -108,21 +113,30 @@ class GameClient:
         current_time = pygame.time.get_ticks()
         animation_progress = min(1.0, (current_time - self.last_draw_time) / self.draw_animation_duration)
         
+        print(f"Drawing cards: {self.drawn_cards}")
         for player, card in self.drawn_cards.items():
             if card and "art" in card:
                 try:
                     image_path = self.images_path / card["art"]
+                    print(f"Attempting to load image from: {image_path}")
+                    print(f"Image path exists: {image_path.exists()}")
+                    print(f"Image path is file: {image_path.is_file()}")
+                    
                     if not image_path.exists():
                         print(f"ERROR: Image file not found at {image_path}")
                         continue
                         
                     card_image = pygame.image.load(str(image_path))
+                    print(f"Successfully loaded image: {card_image.get_size()}")
+                    
                     card_image = pygame.transform.scale(card_image, (self.card_width, self.card_height))
+                    print(f"Scaled image size: {card_image.get_size()}")
                     
                     # Calculate positions
                     x_pos = padding + (player - 1) * card_spacing
                     y_pos = int(self.window_height * 0.3) if player == 1 else int(self.window_height * 0.6)
                     
+                    print(f"Drawing card at position: ({x_pos}, {y_pos})")
                     # Draw card with animation
                     start_pos = (self.window_width // 2, self.window_height // 2)  # Start from center
                     end_pos = (x_pos, y_pos)
