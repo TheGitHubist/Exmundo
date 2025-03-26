@@ -133,6 +133,7 @@ class GameServer:
         await writer.wait_closed()
         print(f"Player {player_number} disconnected")
         writer.close()
+    await writer.wait_closed()
 
 async def main():
     game_server = GameServer()
