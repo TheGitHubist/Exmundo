@@ -103,8 +103,8 @@ class GameServer:
                                 print(f"Turn change sent to player")
                             
                             self.game_manager.switch_player()
-                        else:
-                            print("No cards available to draw!")
+                    else:
+                        print("No cards available to draw!")
 
             except Exception as e:
                 print(f"Error handling client {addr}: {e}")
