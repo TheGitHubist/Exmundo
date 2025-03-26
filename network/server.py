@@ -136,15 +136,16 @@ class GameServer:
         # writer.write("Not Player".encode())
         # await writer.drain()
 
-async def main():
-    game_server = GameServer()
-    server = await asyncio.start_server(game_server.handle_client_msg, '', port)
-    
-    addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
-    print(f'Server running on {addrs}')
+while True:
+    async def main():
+        game_server = GameServer()
+        server = await asyncio.start_server(game_server.handle_client_msg, '', port)
+        
+        addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
+        print(f'Server running on {addrs}')
 
-    async with server:
-        await server.serve_forever()
+        async with server:
+            await server.serve_forever()
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    if __name__ == "__main__":
+        asyncio.run(main())
