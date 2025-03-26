@@ -78,6 +78,9 @@ class GameServer:
                         if self.available_cards:
                             # Create a unique card by combining the base card with a unique identifier
                             card_index = player_number % len(self.available_cards)
+                            print("_______________________________________________________________________")
+                            print(card_index)
+                            print("_______________________________________________________________________")
                             base_card_name = self.available_cards[card_index]
                             unique_id = f"{player_number}_{len(self.available_cards)}_{card_index}"
                             card = {
