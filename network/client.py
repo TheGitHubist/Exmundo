@@ -183,7 +183,7 @@ class GameClient:
             elif event.type == pygame.VIDEORESIZE:
                 self.handle_resize(event)
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE and self.current_player == self.player_number:
                     print(f"Player {self.player_number} requesting card draw")
                     writer.write("draw_card".encode())
                     await writer.drain()
