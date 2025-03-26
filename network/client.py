@@ -29,8 +29,8 @@ class GameClient:
         self.screen = pygame.display.set_mode((self.window_width, self.window_height), pygame.RESIZABLE)
         pygame.display.set_caption("Card Game")
         
-        # Calculate card size based on window size
-        self.card_width = int(self.window_width * 0.15)  # 15% of window width
+        # Calculate card size based on window size (smaller cards)
+        self.card_width = int(self.window_width * 0.08)  # 8% of window width (reduced from 15%)
         self.card_height = int(self.card_width * 1.5)    # 1.5 times width for aspect ratio
         
         self.font = pygame.font.Font(None, int(self.window_height * 0.04))  # Scale font size
@@ -50,19 +50,12 @@ class GameClient:
                 print(f"Image {img.name} exists: {img.exists()}")
                 print(f"Image {img.name} is file: {img.is_file()}")
                 print(f"Image {img.name} full path: {img.absolute()}")
-                
-                # Test load each image
-                try:
-                    test_image = pygame.image.load(str(img))
-                    print(f"Successfully loaded test image for {img.name}: {test_image.get_size()}")
-                except Exception as e:
-                    print(f"Error loading test image for {img.name}: {e}")
 
     def handle_resize(self, event):
         """Handle window resize events"""
         self.window_width = event.w
         self.window_height = event.h
-        self.card_width = int(self.window_width * 0.15)
+        self.card_width = int(self.window_width * 0.08)  # 8% of window width
         self.card_height = int(self.card_width * 1.5)
         self.font = pygame.font.Font(None, int(self.window_height * 0.04))
 
@@ -100,14 +93,6 @@ class GameClient:
         except json.JSONDecodeError:
             if message == "Game started":
                 print("Game has started!")
-                # Test draw a card for player 1 when game starts
-                if self.player_number == 1:
-                    print("Testing card draw for player 1")
-                    self.drawn_cards[1] = {
-                        "art": list(self.images_path.glob('*.png'))[0].name,
-                        "name": "Test Card"
-                    }
-                    self.last_draw_time = pygame.time.get_ticks()
             elif message.startswith("Player"):
                 self.player_number = int(message.split()[1])
                 print(f"You are Player {self.player_number}")
@@ -130,7 +115,7 @@ class GameClient:
         
         # Calculate positions based on window size
         padding = int(self.window_width * 0.05)  # 5% padding
-        card_spacing = int(self.window_width * 0.2)  # 20% spacing between cards
+        card_spacing = int(self.window_width * 0.15)  # 15% spacing between cards (reduced from 20%)
         
         # Draw player information
         player_text = f"Player {self.player_number}"

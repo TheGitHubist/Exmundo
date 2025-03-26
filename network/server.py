@@ -100,22 +100,29 @@ class GameServer:
                                 "card": card
                             })
                             print(f"Sending card data: {response}")
-                            for _, writer in self.connected_players:
-                                writer.write(response.encode())
-                                await writer.drain()
-                                print("Card data sent to player")
+                            
+                            # Send to all players and wait for each to complete
+                            for _, player_writer in self.connected_players:
+                                player_writer.write(response.encode())
+                                await player_writer.drain()
+                                print(f"Card data sent to player")
+                            
+                            # Wait a small delay to ensure messages are sent
+                            await asyncio.sleep(0.1)
+                            
+                            # Send turn change message
+                            turn_msg = json.dumps({
+                                "type": "turn_change",
+                                "current_player": self.game_manager.get_current_player()
+                            })
+                            for _, player_writer in self.connected_players:
+                                player_writer.write(turn_msg.encode())
+                                await player_writer.drain()
+                                print(f"Turn change sent to player")
+                            
+                            self.game_manager.switch_player()
                         else:
                             print("No cards available to draw!")
-                        
-                        self.game_manager.switch_player()
-                        # Notify both players about turn change
-                        turn_msg = json.dumps({
-                            "type": "turn_change",
-                            "current_player": self.game_manager.get_current_player()
-                        })
-                        for _, writer in self.connected_players:
-                            writer.write(turn_msg.encode())
-                            await writer.drain()
 
             except Exception as e:
                 print(f"Error handling client {addr}: {e}")
