@@ -32,6 +32,14 @@ class GameServer:
                 card_path = self.images_path / card
                 print(f"Card {card} exists: {card_path.exists()}")
                 print(f"Card {card} is file: {card_path.is_file()}")
+                print(f"Card {card} full path: {card_path.absolute()}")
+                
+                # Test load each image
+                try:
+                    test_image = pygame.image.load(str(card_path))
+                    print(f"Successfully loaded test image for {card}: {test_image.get_size()}")
+                except Exception as e:
+                    print(f"Error loading test image for {card}: {e}")
 
     async def handle_client_msg(self, reader, writer):
         addr = writer.get_extra_info('peername')
@@ -71,10 +79,19 @@ class GameServer:
                             card_index = player_number % len(self.available_cards)
                             card_name = self.available_cards[card_index]
                             card = {
-                                "art": card_name
+                                "art": card_name,
+                                "name": card_name.split('.')[0]  # Add card name without extension
                             }
                             print(f"Drawing card for player {player_number}: {card}")
                             print(f"Using card index {card_index}: {card_name}")
+                            print(f"Card full path: {self.images_path / card_name}")
+                            
+                            # Test load the image before sending
+                            try:
+                                test_image = pygame.image.load(str(self.images_path / card_name))
+                                print(f"Successfully loaded test image before sending: {test_image.get_size()}")
+                            except Exception as e:
+                                print(f"Error loading test image before sending: {e}")
                             
                             # Notify both players about the card draw
                             response = json.dumps({
@@ -83,22 +100,29 @@ class GameServer:
                                 "card": card
                             })
                             print(f"Sending card data: {response}")
-                            for _, writer in self.connected_players:
-                                writer.write(response.encode())
-                                await writer.drain()
-                                print("Card data sent to player")
+                            
+                            # Send to all players and wait for each to complete
+                            for _, player_writer in self.connected_players:
+                                player_writer.write(response.encode())
+                                await player_writer.drain()
+                                print(f"Card data sent to player")
+                            
+                            # Wait a small delay to ensure messages are sent
+                            await asyncio.sleep(0.1)
+                            
+                            # Send turn change message
+                            turn_msg = json.dumps({
+                                "type": "turn_change",
+                                "current_player": self.game_manager.get_current_player()
+                            })
+                            for _, player_writer in self.connected_players:
+                                player_writer.write(turn_msg.encode())
+                                await player_writer.drain()
+                                print(f"Turn change sent to player")
+                            
+                            self.game_manager.switch_player()
                         else:
                             print("No cards available to draw!")
-                        
-                        self.game_manager.switch_player()
-                        # Notify both players about turn change
-                        turn_msg = json.dumps({
-                            "type": "turn_change",
-                            "current_player": self.game_manager.get_current_player()
-                        })
-                        for _, writer in self.connected_players:
-                            writer.write(turn_msg.encode())
-                            await writer.drain()
 
             except Exception as e:
                 print(f"Error handling client {addr}: {e}")
