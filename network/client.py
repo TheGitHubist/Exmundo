@@ -13,6 +13,8 @@ class GameClient:
         self.player_number = None
         self.current_player = 1
         self.drawn_cards = {}  # Store drawn cards for both players
+        self.last_draw_time = 0  # For animation
+        self.draw_animation_duration = 500  # milliseconds
         
         # Get screen info and set up display
         info = pygame.display.Info()
@@ -63,6 +65,7 @@ class GameClient:
                 player = data["player"]
                 card = data["card"]
                 self.drawn_cards[player] = card
+                self.last_draw_time = pygame.time.get_ticks()  # Start animation
                 print(f"Card drawn for player {player}: {card}")
                 print(f"Current drawn cards: {self.drawn_cards}")
             elif data["type"] == "turn_change":
@@ -74,6 +77,19 @@ class GameClient:
             elif message.startswith("Player"):
                 self.player_number = int(message.split()[1])
                 print(f"You are Player {self.player_number}")
+
+    def draw_card_with_animation(self, card_image, start_pos, end_pos, progress):
+        """Draw a card with animation"""
+        if progress >= 1.0:
+            self.screen.blit(card_image, end_pos)
+            return
+
+        # Calculate current position
+        current_x = start_pos[0] + (end_pos[0] - start_pos[0]) * progress
+        current_y = start_pos[1] + (end_pos[1] - start_pos[1]) * progress
+        
+        # Draw card at current position
+        self.screen.blit(card_image, (current_x, current_y))
 
     async def draw_game_state(self):
         self.screen.fill((255, 255, 255))
@@ -89,32 +105,35 @@ class GameClient:
         self.screen.blit(self.font.render(turn_text, True, (0, 0, 0)), (padding, padding * 2))
 
         # Draw cards for both players
-        print(f"Drawing cards: {self.drawn_cards}")
+        current_time = pygame.time.get_ticks()
+        animation_progress = min(1.0, (current_time - self.last_draw_time) / self.draw_animation_duration)
+        
         for player, card in self.drawn_cards.items():
             if card and "art" in card:
                 try:
                     image_path = self.images_path / card["art"]
-                    print(f"Attempting to load image from: {image_path}")
-                    print(f"Image path exists: {image_path.exists()}")
-                    print(f"Image path is file: {image_path.is_file()}")
-                    
                     if not image_path.exists():
                         print(f"ERROR: Image file not found at {image_path}")
                         continue
                         
                     card_image = pygame.image.load(str(image_path))
-                    print(f"Successfully loaded image: {card_image.get_size()}")
-                    
                     card_image = pygame.transform.scale(card_image, (self.card_width, self.card_height))
-                    print(f"Scaled image size: {card_image.get_size()}")
                     
-                    # Calculate card position
+                    # Calculate positions
                     x_pos = padding + (player - 1) * card_spacing
                     y_pos = int(self.window_height * 0.3) if player == 1 else int(self.window_height * 0.6)
                     
-                    print(f"Drawing card at position: ({x_pos}, {y_pos})")
-                    self.screen.blit(card_image, (x_pos, y_pos))
-                    print(f"Successfully drew card for player {player}")
+                    # Draw card with animation
+                    start_pos = (self.window_width // 2, self.window_height // 2)  # Start from center
+                    end_pos = (x_pos, y_pos)
+                    self.draw_card_with_animation(card_image, start_pos, end_pos, animation_progress)
+                    
+                    # Draw player label under the card
+                    player_label = self.font.render(f"Player {player}", True, (0, 0, 0))
+                    label_pos = (x_pos + self.card_width // 2 - player_label.get_width() // 2,
+                               y_pos + self.card_height + 10)
+                    self.screen.blit(player_label, label_pos)
+                    
                 except Exception as e:
                     print(f"Error loading card image: {e}")
                     # Draw a placeholder rectangle if image loading fails
