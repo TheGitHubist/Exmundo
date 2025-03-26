@@ -132,20 +132,20 @@ class GameServer:
         writer.close()
         await writer.wait_closed()
         print(f"Player {player_number} disconnected")
-        sys.exit("Disconnect")
+        exit("Disconnect")
         # writer.write("Not Player".encode())
         # await writer.drain()
 
-while True:
-    async def main():
-        game_server = GameServer()
-        server = await asyncio.start_server(game_server.handle_client_msg, '', port)
-        
-        addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
-        print(f'Server running on {addrs}')
 
-        async with server:
-            await server.serve_forever()
+async def main():
+    game_server = GameServer()
+    server = await asyncio.start_server(game_server.handle_client_msg, '', port)
+    
+    addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
+    print(f'Server running on {addrs}')
 
-    if __name__ == "__main__":
-        asyncio.run(main())
+    async with server:
+        await server.serve_forever()
+
+if __name__ == "__main__":
+    asyncio.run(main())
