@@ -15,6 +15,7 @@ class GameClient:
         self.drawn_cards = {}  # Store drawn cards for both players
         self.last_draw_time = 0  # For animation
         self.draw_animation_duration = 500  # milliseconds
+        self.initial_cards_drawn = False  # Track if initial cards have been drawn
         
         # Get screen info and set up display
         info = pygame.display.Info()
@@ -59,7 +60,7 @@ class GameClient:
         self.card_height = int(self.card_width * 1.5)
         self.font = pygame.font.Font(None, int(self.window_height * 0.04))
 
-    async def handle_server_message(self, message):
+    async def handle_server_message(self, message, writer):
         print(f"Received message: {message}")
         try:
             data = json.loads(message)
@@ -71,7 +72,9 @@ class GameClient:
                 print(f"Card art exists: {(self.images_path / card['art']).exists()}")
                 
                 # Store the card data
-                self.drawn_cards[player] = card
+                if player not in self.drawn_cards:
+                    self.drawn_cards[player] = []
+                self.drawn_cards[player].append(card)
                 self.last_draw_time = pygame.time.get_ticks()  # Start animation
                 print(f"Card drawn for player {player}: {card}")
                 print(f"Current drawn cards: {self.drawn_cards}")
@@ -93,6 +96,10 @@ class GameClient:
         except json.JSONDecodeError:
             if message == "Game started":
                 print("Game has started!")
+                # Start drawing initial cards
+                self.initial_cards_drawn = False
+                # Create a task for initial card drawing
+                asyncio.create_task(self.draw_initial_cards(writer))
             elif message.startswith("Player"):
                 self.player_number = int(message.split()[1])
                 print(f"You are Player {self.player_number}")
@@ -110,12 +117,35 @@ class GameClient:
         # Draw card at current position
         self.screen.blit(card_image, (current_x, current_y))
 
+    async def draw_initial_cards(self, writer):
+        """Draw 5 cards for each player at game start"""
+        if self.initial_cards_drawn:
+            return
+            
+        print("Starting initial card draw")
+        # Draw 5 cards for each player
+        for _ in range(5):
+            # Draw for player 1
+            print("Drawing initial card for player 1")
+            writer.write("draw_card".encode())
+            await writer.drain()
+            await asyncio.sleep(0.2)  # Small delay between draws
+            
+            # Draw for player 2
+            print("Drawing initial card for player 2")
+            writer.write("draw_card".encode())
+            await writer.drain()
+            await asyncio.sleep(0.2)  # Small delay between draws
+            
+        self.initial_cards_drawn = True
+        print("Initial card draw complete")
+
     async def draw_game_state(self):
         self.screen.fill((255, 255, 255))
         
         # Calculate positions based on window size
         padding = int(self.window_width * 0.05)  # 5% padding
-        card_spacing = int(self.window_width * 0.15)  # 15% spacing between cards (reduced from 20%)
+        card_spacing = int(self.window_width * 0.15)  # 15% spacing between cards
         
         # Draw player information
         player_text = f"Player {self.player_number}"
@@ -128,48 +158,53 @@ class GameClient:
         animation_progress = min(1.0, (current_time - self.last_draw_time) / self.draw_animation_duration)
         
         print(f"Drawing cards: {self.drawn_cards}")
-        for player, card in self.drawn_cards.items():
-            if card and "art" in card:
-                try:
-                    image_path = self.images_path / card["art"]
-                    print(f"Attempting to load image from: {image_path}")
-                    print(f"Image path exists: {image_path.exists()}")
-                    print(f"Image path is file: {image_path.is_file()}")
-                    
-                    if not image_path.exists():
-                        print(f"ERROR: Image file not found at {image_path}")
-                        continue
+        for player, cards in self.drawn_cards.items():
+            if not isinstance(cards, list):
+                cards = [cards]  # Convert single card to list for compatibility
+                
+            for i, card in enumerate(cards):
+                if card and "art" in card:
+                    try:
+                        image_path = self.images_path / card["art"]
+                        print(f"Attempting to load image from: {image_path}")
+                        print(f"Image path exists: {image_path.exists()}")
+                        print(f"Image path is file: {image_path.is_file()}")
                         
-                    card_image = pygame.image.load(str(image_path))
-                    print(f"Successfully loaded image: {card_image.get_size()}")
-                    
-                    card_image = pygame.transform.scale(card_image, (self.card_width, self.card_height))
-                    print(f"Scaled image size: {card_image.get_size()}")
-                    
-                    # Calculate positions
-                    x_pos = padding + (player - 1) * card_spacing
-                    y_pos = int(self.window_height * 0.3) if player == 1 else int(self.window_height * 0.6)
-                    
-                    print(f"Drawing card at position: ({x_pos}, {y_pos})")
-                    # Draw card with animation
-                    start_pos = (self.window_width // 2, self.window_height // 2)  # Start from center
-                    end_pos = (x_pos, y_pos)
-                    self.draw_card_with_animation(card_image, start_pos, end_pos, animation_progress)
-                    
-                    # Draw player label under the card
-                    player_label = self.font.render(f"Player {player}", True, (0, 0, 0))
-                    label_pos = (x_pos + self.card_width // 2 - player_label.get_width() // 2,
-                               y_pos + self.card_height + 10)
-                    self.screen.blit(player_label, label_pos)
-                    
-                except Exception as e:
-                    print(f"Error loading card image: {e}")
-                    # Draw a placeholder rectangle if image loading fails
-                    rect = pygame.Rect(x_pos, y_pos, self.card_width, self.card_height)
-                    pygame.draw.rect(self.screen, (200, 200, 200), rect)
-                    error_text = self.font.render("Card", True, (0, 0, 0))
-                    text_rect = error_text.get_rect(center=rect.center)
-                    self.screen.blit(error_text, text_rect)
+                        if not image_path.exists():
+                            print(f"ERROR: Image file not found at {image_path}")
+                            continue
+                            
+                        card_image = pygame.image.load(str(image_path))
+                        print(f"Successfully loaded image: {card_image.get_size()}")
+                        
+                        card_image = pygame.transform.scale(card_image, (self.card_width, self.card_height))
+                        print(f"Scaled image size: {card_image.get_size()}")
+                        
+                        # Calculate positions with horizontal spacing for multiple cards
+                        x_pos = padding + (player - 1) * card_spacing + i * (self.card_width + 10)
+                        y_pos = int(self.window_height * 0.3) if player == 1 else int(self.window_height * 0.6)
+                        
+                        print(f"Drawing card at position: ({x_pos}, {y_pos})")
+                        # Draw card with animation
+                        start_pos = (self.window_width // 2, self.window_height // 2)  # Start from center
+                        end_pos = (x_pos, y_pos)
+                        self.draw_card_with_animation(card_image, start_pos, end_pos, animation_progress)
+                        
+                        # Draw player label under the first card only
+                        if i == 0:
+                            player_label = self.font.render(f"Player {player}", True, (0, 0, 0))
+                            label_pos = (x_pos + self.card_width // 2 - player_label.get_width() // 2,
+                                       y_pos + self.card_height + 10)
+                            self.screen.blit(player_label, label_pos)
+                        
+                    except Exception as e:
+                        print(f"Error loading card image: {e}")
+                        # Draw a placeholder rectangle if image loading fails
+                        rect = pygame.Rect(x_pos, y_pos, self.card_width, self.card_height)
+                        pygame.draw.rect(self.screen, (200, 200, 200), rect)
+                        error_text = self.font.render("Card", True, (0, 0, 0))
+                        text_rect = error_text.get_rect(center=rect.center)
+                        self.screen.blit(error_text, text_rect)
 
         pygame.display.flip()
 
@@ -185,13 +220,13 @@ class GameClient:
                     writer.write("draw_card".encode())
                     await writer.drain()
 
-    async def receive(self, reader):
+    async def receive(self, reader, writer):
         while self.running:
             try:
                 data = await reader.read(1024)
                 if data:
                     message = data.decode()
-                    await self.handle_server_message(message)
+                    await self.handle_server_message(message, writer)
             except Exception as e:
                 print(f"Error receiving data: {e}")
                 break
@@ -203,7 +238,7 @@ class GameClient:
             print("Connected to server")
             
             # Start receiving messages
-            receive_task = asyncio.create_task(self.receive(reader))
+            receive_task = asyncio.create_task(self.receive(reader, writer))
             
             while self.running:
                 await self.handle_input(writer)
