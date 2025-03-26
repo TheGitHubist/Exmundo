@@ -16,6 +16,7 @@ class GameClient:
         self.last_draw_time = 0  # For animation
         self.draw_animation_duration = 500  # milliseconds
         self.initial_cards_drawn = False  # Track if initial cards have been drawn
+        self.game_started = False  # Track if game has started
         
         # Get screen info and set up display
         info = pygame.display.Info()
@@ -96,6 +97,7 @@ class GameClient:
         except json.JSONDecodeError:
             if message == "Game started":
                 print("Game has started!")
+                self.game_started = True
                 # Start drawing initial cards after a short delay to ensure player numbers are set
                 await asyncio.sleep(0.5)
                 if self.player_number is not None:
@@ -125,7 +127,7 @@ class GameClient:
 
     async def draw_initial_cards(self, writer):
         """Draw 5 cards for each player at game start"""
-        if self.initial_cards_drawn:
+        if self.initial_cards_drawn or self.player_number is None:
             return
             
         print(f"Starting initial card draw for player {self.player_number}")
