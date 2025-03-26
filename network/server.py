@@ -17,7 +17,6 @@ class GameServer:
     def __init__(self):
         self.game_manager = GameManager()
         self.connected_players = []
-        self.game_started = False
         self.images_path = Path(__file__).parent.parent / 'images'
         print(f"Server images path: {self.images_path}")
         print(f"Images path exists: {self.images_path.exists()}")
@@ -56,7 +55,7 @@ class GameServer:
         print(f"Player {player_number} connected from {addr}")
 
         if len(self.connected_players) == 2:
-            self.game_started = True
+            self.game_manager.game_started = True
             print("Game started with 2 players!")
             # Notify both players that game has started
             for _, writer in self.connected_players:
