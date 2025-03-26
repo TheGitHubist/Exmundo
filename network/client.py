@@ -98,19 +98,27 @@ class GameClient:
             if message == "Game started":
                 print("Game has started!")
                 self.game_started = True
-                # Start drawing initial cards after a short delay to ensure player numbers are set
-                await asyncio.sleep(0.5)
+                # Wait a bit longer to ensure player number is set
+                await asyncio.sleep(1.0)
                 if self.player_number is not None:
+                    print(f"Starting initial card draw for player {self.player_number}")
                     await self.draw_initial_cards(writer)
-            elif message == "Not Player":
+                else:
+                    print("ERROR: Player number not set when game started!")
+            elif message == "Player disconnected":
                 print("Player disconnected")
                 self.running = False
             elif message.startswith("Player"):
-                self.player_number = int(message.split()[1])
-                print(f"You are Player {self.player_number}")
-                # If game has already started, draw initial cards
-                if self.game_started:
-                    await self.draw_initial_cards(writer)
+                try:
+                    self.player_number = int(message.split()[1])
+                    print(f"You are Player {self.player_number}")
+                    # If game has already started, draw initial cards
+                    if self.game_started:
+                        print(f"Game already started, drawing initial cards for player {self.player_number}")
+                        await self.draw_initial_cards(writer)
+                except ValueError as e:
+                    print(f"Error parsing player number: {e}")
+                    self.running = False
 
     def draw_card_with_animation(self, card_image, start_pos, end_pos, progress):
         """Draw a card with animation"""
@@ -128,15 +136,17 @@ class GameClient:
     async def draw_initial_cards(self, writer):
         """Draw 5 cards for each player at game start"""
         if self.initial_cards_drawn or self.player_number is None:
+            print(f"Skipping initial card draw - drawn: {self.initial_cards_drawn}, player: {self.player_number}")
             return
             
         print(f"Starting initial card draw for player {self.player_number}")
         # Draw 5 cards for the current player
-        for _ in range(5):
-            print(f"Drawing initial card for player {self.player_number}")
+        for i in range(5):
+            print(f"Drawing initial card {i+1}/5 for player {self.player_number}")
             writer.write("draw_card".encode())
             await writer.drain()
-            await asyncio.sleep(0.2)  # Small delay between draws
+            # Wait longer between draws to ensure server processes each request
+            await asyncio.sleep(0.5)
             
         self.initial_cards_drawn = True
         print(f"Initial card draw complete for player {self.player_number}")
@@ -250,6 +260,9 @@ class GameClient:
             
             # Start receiving messages
             receive_task = asyncio.create_task(self.receive(reader, writer))
+            
+            # Wait a bit to ensure initial messages are received
+            await asyncio.sleep(0.5)
             
             while self.running:
                 await self.handle_input(writer)
