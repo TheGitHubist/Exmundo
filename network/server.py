@@ -76,19 +76,22 @@ class GameServer:
                     if self.game_manager.is_player_turn(player_number):
                         # For testing, use available card images
                         if self.available_cards:
+                            # Create a unique card by combining the base card with a unique identifier
                             card_index = player_number % len(self.available_cards)
-                            card_name = self.available_cards[card_index]
+                            base_card_name = self.available_cards[card_index]
+                            unique_id = f"{player_number}_{len(self.available_cards)}_{card_index}"
                             card = {
-                                "art": card_name,
-                                "name": card_name.split('.')[0]  # Add card name without extension
+                                "art": base_card_name,
+                                "name": f"{base_card_name.split('.')[0]}_{unique_id}",  # Unique name
+                                "id": unique_id  # Add unique identifier
                             }
-                            print(f"Drawing card for player {player_number}: {card}")
-                            print(f"Using card index {card_index}: {card_name}")
-                            print(f"Card full path: {self.images_path / card_name}")
+                            print(f"Drawing unique card for player {player_number}: {card}")
+                            print(f"Using card index {card_index}: {base_card_name}")
+                            print(f"Card full path: {self.images_path / base_card_name}")
                             
                             # Test load the image before sending
                             try:
-                                test_image = pygame.image.load(str(self.images_path / card_name))
+                                test_image = pygame.image.load(str(self.images_path / base_card_name))
                                 print(f"Successfully loaded test image before sending: {test_image.get_size()}")
                             except Exception as e:
                                 print(f"Error loading test image before sending: {e}")

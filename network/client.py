@@ -161,6 +161,16 @@ class GameClient:
             if not isinstance(cards, list):
                 cards = [cards]  # Convert single card to list for compatibility
                 
+            # Calculate starting position based on player and current turn
+            if player == self.player_number:
+                # Current player's cards go from bottom right to bottom left
+                start_x = self.window_width - padding - (len(cards) - 1) * (self.card_width + 10)
+                y_pos = int(self.window_height * 0.7)  # Bottom of screen
+            else:
+                # Opponent's cards go from top left to top right
+                start_x = padding
+                y_pos = int(self.window_height * 0.3)  # Top of screen
+                
             for i, card in enumerate(cards):
                 if card and "art" in card:
                     try:
@@ -179,9 +189,9 @@ class GameClient:
                         card_image = pygame.transform.scale(card_image, (self.card_width, self.card_height))
                         print(f"Scaled image size: {card_image.get_size()}")
                         
-                        # Calculate positions with horizontal spacing for multiple cards
-                        x_pos = padding + (player - 1) * card_spacing + i * (self.card_width + 10)
-                        y_pos = int(self.window_height * 0.3) if player == 1 else int(self.window_height * 0.6)
+                        # Calculate x position - for current player, cards go right to left
+                        # for opponent, cards go left to right
+                        x_pos = start_x + i * (self.card_width + 10)
                         
                         print(f"Drawing card at position: ({x_pos}, {y_pos})")
                         # Draw card with animation
@@ -189,11 +199,11 @@ class GameClient:
                         end_pos = (x_pos, y_pos)
                         self.draw_card_with_animation(card_image, start_pos, end_pos, animation_progress)
                         
-                        # Draw player label under the first card only
+                        # Draw player label under/above the first card only
                         if i == 0:
                             player_label = self.font.render(f"Player {player}", True, (0, 0, 0))
                             label_pos = (x_pos + self.card_width // 2 - player_label.get_width() // 2,
-                                       y_pos + self.card_height + 10)
+                                       y_pos + (self.card_height + 10) if player == self.player_number else y_pos - 30)
                             self.screen.blit(player_label, label_pos)
                         
                     except Exception as e:
