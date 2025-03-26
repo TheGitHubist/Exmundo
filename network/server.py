@@ -131,13 +131,23 @@ class GameServer:
                 print(f"Error handling client {addr}: {e}")
                 break
 
+        # Handle player disconnection
         self.connected_players.remove((addr, writer))
         writer.close()
         await writer.wait_closed()
         print(f"Player {player_number} disconnected")
-        for _, writer in self.connected_players:
-                writer.write("Not Player".encode())
-                await writer.drain()
+        
+        # Reset game state if a player disconnects
+        self.game_started = False
+        self.game_manager = GameManager()  # Reset game manager
+        
+        # Notify remaining players about disconnection
+        for _, remaining_writer in self.connected_players:
+            try:
+                remaining_writer.write("Player disconnected".encode())
+                await remaining_writer.drain()
+            except Exception as e:
+                print(f"Error notifying remaining player: {e}")
 
 async def main():
     game_server = GameServer()
