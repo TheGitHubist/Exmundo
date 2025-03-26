@@ -102,9 +102,9 @@ class GameServer:
                             print(f"Sending card data: {response}")
                             
                             # Send to all players and wait for each to complete
-                            for _, writer in self.connected_players:
-                                writer.write(response.encode())
-                                await writer.drain()
+                            for _, player_writer in self.connected_players:
+                                player_writer.write(response.encode())
+                                await player_writer.drain()
                                 print(f"Card data sent to player")
                             
                             # Wait a small delay to ensure messages are sent
@@ -115,9 +115,9 @@ class GameServer:
                                 "type": "turn_change",
                                 "current_player": self.game_manager.get_current_player()
                             })
-                            for _, writer in self.connected_players:
-                                writer.write(turn_msg.encode())
-                                await writer.drain()
+                            for _, player_writer in self.connected_players:
+                                player_writer.write(turn_msg.encode())
+                                await player_writer.drain()
                                 print(f"Turn change sent to player")
                             
                             self.game_manager.switch_player()
@@ -132,9 +132,9 @@ class GameServer:
         writer.close()
         await writer.wait_closed()
         print(f"Player {player_number} disconnected")
-        # for _, writer in self.connected_players:
-        #         writer.write("Not Player".encode())
-        #         await writer.drain()
+        for _, writer in self.connected_players:
+                writer.write("Not Player".encode())
+                await writer.drain()
 
 async def main():
     game_server = GameServer()
