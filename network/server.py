@@ -18,27 +18,27 @@ class GameServer:
         self.game_manager = GameManager()
         self.connected_players = []
         self.images_path = Path(__file__).parent.parent / 'images'
-        # print(f"Server images path: {self.images_path}")
-        # print(f"Images path exists: {self.images_path.exists()}")
-        
+        print(f"Server images path: {self.images_path}")
+        print(f"Images path exists: {self.images_path.exists()}")
+    
         # Load available card images
         self.available_cards = [f.name for f in self.images_path.glob('*.png')]
-        # print(f"Available cards: {self.available_cards}")
+        print(f"Available cards: {self.available_cards}")
         if not self.available_cards:
             print("WARNING: No card images found!")
         else:
             for card in self.available_cards:
                 card_path = self.images_path / card
-                #print(f"Card {card} exists: {card_path.exists()}")
-                #print(f"Card {card} is file: {card_path.is_file()}")
-                #print(f"Card {card} full path: {card_path.absolute()}")
+                print(f"Card {card} exists: {card_path.exists()}")
+                print(f"Card {card} is file: {card_path.is_file()}")
+                print(f"Card {card} full path: {card_path.absolute()}")
                 
                 # Test load each image
                 try:
                     test_image = pygame.image.load(str(card_path))
-                    #print(f"Successfully loaded test image for {card}: {test_image.get_size()}")
+                    print(f"Successfully loaded test image for {card}: {test_image.get_size()}")
                 except Exception as e:
-                    #print(f"Error loading test image for {card}: {e}")
+                    print(f"Error loading test image for {card}: {e}")
                     pass
 
     async def handle_client_msg(self, reader, writer):
