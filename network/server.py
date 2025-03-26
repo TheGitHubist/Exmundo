@@ -33,6 +33,13 @@ class GameServer:
                 print(f"Card {card} exists: {card_path.exists()}")
                 print(f"Card {card} is file: {card_path.is_file()}")
                 print(f"Card {card} full path: {card_path.absolute()}")
+                
+                # Test load each image
+                try:
+                    test_image = pygame.image.load(str(card_path))
+                    print(f"Successfully loaded test image for {card}: {test_image.get_size()}")
+                except Exception as e:
+                    print(f"Error loading test image for {card}: {e}")
 
     async def handle_client_msg(self, reader, writer):
         addr = writer.get_extra_info('peername')
@@ -78,6 +85,13 @@ class GameServer:
                             print(f"Drawing card for player {player_number}: {card}")
                             print(f"Using card index {card_index}: {card_name}")
                             print(f"Card full path: {self.images_path / card_name}")
+                            
+                            # Test load the image before sending
+                            try:
+                                test_image = pygame.image.load(str(self.images_path / card_name))
+                                print(f"Successfully loaded test image before sending: {test_image.get_size()}")
+                            except Exception as e:
+                                print(f"Error loading test image before sending: {e}")
                             
                             # Notify both players about the card draw
                             response = json.dumps({

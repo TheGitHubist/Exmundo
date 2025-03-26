@@ -69,10 +69,24 @@ class GameClient:
                 print(f"Received card data: {card}")
                 print(f"Card art path: {self.images_path / card['art']}")
                 print(f"Card art exists: {(self.images_path / card['art']).exists()}")
+                
+                # Store the card data
                 self.drawn_cards[player] = card
                 self.last_draw_time = pygame.time.get_ticks()  # Start animation
                 print(f"Card drawn for player {player}: {card}")
                 print(f"Current drawn cards: {self.drawn_cards}")
+                
+                # Test load the image immediately
+                try:
+                    image_path = self.images_path / card["art"]
+                    if image_path.exists():
+                        test_image = pygame.image.load(str(image_path))
+                        print(f"Successfully loaded test image: {test_image.get_size()}")
+                    else:
+                        print(f"ERROR: Image file not found at {image_path}")
+                except Exception as e:
+                    print(f"Error testing image load: {e}")
+                    
             elif data["type"] == "turn_change":
                 self.current_player = data["current_player"]
                 print(f"Turn changed to player {self.current_player}")
