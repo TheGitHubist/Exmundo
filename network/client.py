@@ -38,20 +38,21 @@ class GameClient:
         self.font = pygame.font.Font(None, int(self.window_height * 0.04))  # Scale font size
         self.running = True
         self.images_path = Path(__file__).parent.parent / 'images'
-        print(f"Client images path: {self.images_path}")
-        print(f"Images path exists: {self.images_path.exists()}")
-        print(f"Images path absolute: {self.images_path.absolute()}")
+        #print(f"Client images path: {self.images_path}")
+        #print(f"Images path exists: {self.images_path.exists()}")
+        #print(f"Images path absolute: {self.images_path.absolute()}")
         
         # Check if images directory exists and has files
         if not self.images_path.exists():
             print(f"ERROR: Images directory not found at {self.images_path}")
         else:
             available_images = list(self.images_path.glob('*.png'))
-            print(f"Available images in directory: {[f.name for f in available_images]}")
+            #print(f"Available images in directory: {[f.name for f in available_images]}")
             for img in available_images:
-                print(f"Image {img.name} exists: {img.exists()}")
-                print(f"Image {img.name} is file: {img.is_file()}")
-                print(f"Image {img.name} full path: {img.absolute()}")
+                #print(f"Image {img.name} exists: {img.exists()}")
+                #print(f"Image {img.name} is file: {img.is_file()}")
+                #print(f"Image {img.name} full path: {img.absolute()}")
+                pass
 
     def handle_resize(self, event):
         """Handle window resize events"""
