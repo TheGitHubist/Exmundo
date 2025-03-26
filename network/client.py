@@ -96,10 +96,9 @@ class GameClient:
         except json.JSONDecodeError:
             if message == "Game started":
                 print("Game has started!")
-                # Start drawing initial cards
-                self.initial_cards_drawn = False
-                # Create a task for initial card drawing
-                asyncio.create_task(self.draw_initial_cards(writer))
+            elif(message == "Not Player"):
+                print("Player disconnected")
+                quit()
             elif message.startswith("Player"):
                 self.player_number = int(message.split()[1])
                 print(f"You are Player {self.player_number}")
