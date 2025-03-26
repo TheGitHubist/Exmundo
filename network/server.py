@@ -132,8 +132,8 @@ class GameServer:
         writer.close()
         await writer.wait_closed()
         print(f"Player {player_number} disconnected")
-        writer.write("Not Player".encode())
-        await writer.drain()
+        # writer.write("Not Player".encode())
+        # await writer.drain()
 
 async def main():
     game_server = GameServer()
