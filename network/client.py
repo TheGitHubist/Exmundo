@@ -50,6 +50,13 @@ class GameClient:
                 print(f"Image {img.name} exists: {img.exists()}")
                 print(f"Image {img.name} is file: {img.is_file()}")
                 print(f"Image {img.name} full path: {img.absolute()}")
+                
+                # Test load each image
+                try:
+                    test_image = pygame.image.load(str(img))
+                    print(f"Successfully loaded test image for {img.name}: {test_image.get_size()}")
+                except Exception as e:
+                    print(f"Error loading test image for {img.name}: {e}")
 
     def handle_resize(self, event):
         """Handle window resize events"""
@@ -93,6 +100,14 @@ class GameClient:
         except json.JSONDecodeError:
             if message == "Game started":
                 print("Game has started!")
+                # Test draw a card for player 1 when game starts
+                if self.player_number == 1:
+                    print("Testing card draw for player 1")
+                    self.drawn_cards[1] = {
+                        "art": list(self.images_path.glob('*.png'))[0].name,
+                        "name": "Test Card"
+                    }
+                    self.last_draw_time = pygame.time.get_ticks()
             elif message.startswith("Player"):
                 self.player_number = int(message.split()[1])
                 print(f"You are Player {self.player_number}")
