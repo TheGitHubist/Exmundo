@@ -78,12 +78,13 @@ class GameServer:
                 if len(parts) > 1 and parts[0] == "569":
                     if player_number == 1:
                         self.game_manager.player1_deck.choice_deck(parts[1])
+                        print(self.game_manager.player1_deck.deckcard.card_list)
                     elif player_number == 2:
                         self.game_manager.player2_deck.choice_deck(parts[1])
 
                 if message == "draw_card":
                     if self.game_manager.is_player_turn(player_number):
-                        card = self.game_manager.draw_card_for_player(player_number)
+                        card = self.game_manager.draw_card(player_number)
                         if card:
                             response = json.dumps({
                                 "type": "card_drawn",

@@ -20,7 +20,6 @@ class GameClient:
         self.draw_animation_duration = 500  # milliseconds
         self.initial_cards_drawn = False  # Track if initial cards have been drawn
         self.game_started = False  # Track if game has started
-        self
         
         # Get screen info and set up display
         info = pygame.display.Info()
