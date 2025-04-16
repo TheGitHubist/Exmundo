@@ -18,6 +18,7 @@ class GameServer:
         self.game_manager = GameManager()
         self.connected_players = []
         self.images_path = Path(__file__).parent.parent / 'images'
+        self.game_started = False
         print(f"Server images path: {self.images_path}")
         print(f"Images path exists: {self.images_path.exists()}")
     
@@ -56,7 +57,7 @@ class GameServer:
         print(f"Player {player_number} connected from {addr}")
 
         if len(self.connected_players) == 2:
-            self.game_manager.game_started = True
+            self.game_started = True
             print("Game started with 2 players!")
             # Notify both players that game has started
             for _, writer in self.connected_players:
@@ -73,14 +74,21 @@ class GameServer:
 
                 print(f"Received message from player {player_number}: {message}")
 
-                if(message.split()[0] == "569" and player_number == 1):
-                    self.game_manager.player1_deck.choice_deck(message.split()[1])
-                elif(message.split()[0] == "569" and player_number == 2):
-                    self.game_manager.player2_deck.choice_deck(message.split()[1])
+                parts = message.split()
+                if len(parts) > 1 and parts[0] == "569":
+                    if player_number == 1:
+                        self.game_manager.player1_deck.choice_deck(parts[1])
+                    elif player_number == 2:
+                        self.game_manager.player2_deck.choice_deck(parts[1])
 
                 if message == "draw_card":
                     if self.game_manager.is_player_turn(player_number):
-#
+                        card = self.game_manager.draw_card_for_player(player_number)
+                        if card:
+                            response = json.dumps({
+                                "type": "card_drawn",
+                                "card": card.to_dict() if hasattr(card, "to_dict") else str(card)
+                            })
                             print(f"Sending card data: {response}")
                             
                             # Send to all players and wait for each to complete
@@ -103,15 +111,20 @@ class GameServer:
                                 print(f"Turn change sent to player")
                             
                             self.game_manager.switch_player()
+                        else:
+                            print("No cards available to draw!")
                     else:
-                        print("No cards available to draw!")
+                        print("Not player's turn!")
 
             except Exception as e:
                 print(f"Error handling client {addr}: {e}")
                 break
 
         # Handle player disconnection
-        self.connected_players.remove((addr, writer))
+        try:
+            self.connected_players.remove((addr, writer))
+        except ValueError:
+            print(f"Warning: Tried to remove player {addr} but not found in connected_players.")
         writer.close()
         await writer.wait_closed()
         print(f"Player {player_number} disconnected")
