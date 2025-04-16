@@ -1,6 +1,6 @@
 import random
 from .cards import CardModel
-from .player import DeckCard
+import json
 
 class Deck:
     def __init__(self, cards=None):
@@ -34,9 +34,9 @@ class Deck:
         return len(self.cards)
 
 class PlayerDeck(Deck):
-    self.deckcard = DeckCard(0)
     def __init__(self, cards=None):
         super().__init__(cards)
+        self.deckcard = DeckCard(0)
         self.hand = []
         self.max_hand_size = 7  # Maximum number of cards a player can have in hand
 

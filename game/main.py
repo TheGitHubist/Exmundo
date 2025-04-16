@@ -2,7 +2,7 @@ import pygame as pg
 import asyncio
 from pathlib import Path
 from mecanics import Turn
-from player import Player
+from deck import PlayerDeck as Player
 
 def main():
     connection_status = ""

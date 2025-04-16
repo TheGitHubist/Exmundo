@@ -4,7 +4,7 @@ import pygame
 import json
 from pathlib import Path
 
-from game.player import Player
+from game.deck import PlayerDeck as Player
 
 pygame.init()
 
