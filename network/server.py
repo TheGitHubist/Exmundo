@@ -86,6 +86,7 @@ class GameServer:
                 if data == b'':
                     break
                         
+                message = data.decode()
                 parts = message.split()
                 if len(parts) > 1 and parts[0] == "569":
                     if player_number == 1:
@@ -95,7 +96,6 @@ class GameServer:
                         self.game_manager.player2_deck.choice_deck(parts[1])
                         print(f"print code: {parts[0]}")
 
-                message = data.decode()
                 player_number = self.connected_players.get(writer, None)
                 if player_number is None:
                     print(f"Received message from unknown player {addr}")
