@@ -160,6 +160,7 @@ class GameServer:
                 player_writer.write("Game started".encode())
                 await player_writer.drain()
 
+        self.game_manager.current_player= 1
         while True:
             try:
                 message = await self.read_client(reader, writer)
