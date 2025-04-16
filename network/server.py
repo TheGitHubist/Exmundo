@@ -87,6 +87,7 @@ class GameServer:
                     break
                         
                 message = data.decode()
+                print(message)
                 parts = message.split()
                 if len(parts) > 1 and parts[0] == "569":
                     if player_number == 1:
