@@ -79,7 +79,7 @@ class GameServer:
             print("Game started with 2 players!")
             # Notify both players that game has started
             for player_writer in self.connected_players.keys():
-                player_writer.write("789".encode())
+                player_writer.write("Game started".encode())
                 await player_writer.drain()
 
         while True:
