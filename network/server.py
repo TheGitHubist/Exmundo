@@ -18,21 +18,20 @@ class GameServer:
         self.game_manager = GameManager()
         self.connected_players = {}  # Map writer to player_number
         self.images_path = Path(__file__).parent.parent / 'images'
-        self.game_started = False
-        print(f"Server images path: {self.images_path}")
-        print(f"Images path exists: {self.images_path.exists()}")
+        # print(f"Server images path: {self.images_path}")
+        # print(f"Images path exists: {self.images_path.exists()}")
 
         # Load available card images
         self.available_cards = [f.name for f in self.images_path.glob('*.png')]
-        print(f"Available cards: {self.available_cards}")
+        #print(f"Available cards: {self.available_cards}")
         if not self.available_cards:
             print("WARNING: No card images found!")
         else:
             for card in self.available_cards:
                 card_path = self.images_path / card
-                print(f"Card {card} exists: {card_path.exists()}")
-                print(f"Card {card} is file: {card_path.is_file()}")
-                print(f"Card {card} full path: {card_path.absolute()}")
+                # print(f"Card {card} exists: {card_path.exists()}")
+                # print(f"Card {card} is file: {card_path.is_file()}")
+                # print(f"Card {card} full path: {card_path.absolute()}")
 
                 # Test load each image
                 try:
@@ -73,7 +72,7 @@ class GameServer:
         print(f"Player {player_number} connected from {addr}")
 
         if len(self.connected_players) == 2:
-            self.game_started = True
+            self.game_manager.game_started = True
             print("Game started with 2 players!")
             # Notify both players that game has started
             for player_writer in self.connected_players.keys():
@@ -87,15 +86,15 @@ class GameServer:
                     break
                         
                 message = data.decode()
-                # parts = message.split()
-                # print(parts)
-                # if len(parts) > 1 and parts[0] == "569":
-                #     if player_number == 1:
-                #         self.game_manager.player1_deck.choice_deck(int(parts[1]))
-                #         print(f"print code: {parts[0]}")
-                #     elif player_number == 2:
-                #         self.game_manager.player2_deck.choice_deck(int(parts[1]))
-                #         print(f"print code: {parts[0]}")
+                parts = message.split()
+                print(parts)
+                if len(parts) > 1 and parts[0] == "569":
+                    if player_number == 1:
+                        self.game_manager.player1_deck.choice_deck(int(parts[1]))
+                        print(f"print code: {parts[0]}")
+                    elif player_number == 2:
+                        self.game_manager.player2_deck.choice_deck(int(parts[1]))
+                        print(f"print code: {parts[0]}")
 
                 player_number = self.connected_players.get(writer, None)
                 if player_number is None:
@@ -162,7 +161,7 @@ class GameServer:
         print(f"Player {player_number} disconnected")
 
         # Reset game state if a player disconnects
-        self.game_started = False
+        self.game_manager.game_started = False
         self.game_manager = GameManager()  # Reset game manager
 
         # Notify remaining players about disconnection
