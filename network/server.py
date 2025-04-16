@@ -91,10 +91,8 @@ class GameServer:
                 if len(parts) > 1 and parts[0] == "569":
                     if player_number == 1:
                         self.game_manager.player1_deck.choice_deck(int(parts[1]))
-                        print(f"print code: {self.game_manager.player1_deck.deckcard.card_list[0]}")
                     elif player_number == 2:
                         self.game_manager.player2_deck.choice_deck(int(parts[1]))
-                        print(f"print code: {parts[0]}")
 
                 player_number = self.connected_players.get(writer, None)
                 if player_number is None:
@@ -144,7 +142,7 @@ class GameServer:
                         else:
                             print("No cards available to draw!")
                     else:
-                        print("Not player's turn!")
+                        print(f"Not player's turn! : {player_number}")
 
             except Exception as e:
                 print(f"Error handling client {addr}: {e}")
