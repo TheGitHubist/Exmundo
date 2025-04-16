@@ -7,7 +7,7 @@
         "type": 10,
         "effect": null,
         "cost": null,
-        "art": "./images/j_el_dinocraft.png"
+        "art": "../../images/j_el_dinocraft.png"
         },{
         "name": "b",
         "atk": 100,
@@ -16,7 +16,7 @@
         "type": 11,
         "effect": null,
         "cost": 1,
-        "art": "./images/j_el_dragbascule.png"
+        "art": "../../images/j_el_dragbascule.png"
         },{
         "name": "c",
         "atk": null,
