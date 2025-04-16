@@ -5,7 +5,7 @@ class GameManager:
     def __init__(self):
         self.player1_deck = PlayerDeck()
         self.player2_deck = PlayerDeck()
-        self.current_player = 2  # 1 or 2
+        self.current_player = 1  # 1 or 2
         self.game_started = False
 
     def start_game(self):
