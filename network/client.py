@@ -246,7 +246,7 @@ class GameClient:
                     await writer.drain()
                     
     async def init_send(self, writer):
-        writer.write(f"569 {self.deck_choice}".encode())
+        writer.write(f"569".encode())
         await writer.drain()
 
     async def receive(self, reader, writer):
@@ -272,9 +272,9 @@ class GameClient:
             # Wait a bit to ensure initial messages are received
             await asyncio.sleep(0.5)
             
+            await self.init_send(writer)
             
             while self.running:
-                await self.init_send(writer)
                 await self.handle_input(writer)
                 await self.draw_game_state()
                 await asyncio.sleep(0.016)  # ~60 FPS
