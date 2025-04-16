@@ -4,8 +4,6 @@ import pygame
 import json
 from pathlib import Path
 
-from game.deck import PlayerDeck as Player
-
 pygame.init()
 
 class GameClient:
