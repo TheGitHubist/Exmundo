@@ -113,13 +113,20 @@ class GameClient:
                 print("Player disconnected")
                 self.running = False
             elif message.startswith("Player"):
+                import re
                 try:
-                    self.player_number = int(message.split()[1])
-                    print(f"You are Player {self.player_number}")
-                    # If game has already started, draw initial cards
-                    if self.game_started:
-                        print(f"Game already started, drawing initial cards for player {self.player_number}")
-                        await self.draw_initial_cards(writer)
+                    # Extract leading digits from the second word after "Player"
+                    player_str = message.split()[1]
+                    match = re.match(r"(\d+)", player_str)
+                    if match:
+                        self.player_number = int(match.group(1))
+                        print(f"You are Player {self.player_number}")
+                        # If game has already started, draw initial cards
+                        if self.game_started:
+                            print(f"Game already started, drawing initial cards for player {self.player_number}")
+                            await self.draw_initial_cards(writer)
+                    else:
+                        raise ValueError(f"No valid player number found in '{player_str}'")
                 except ValueError as e:
                     print(f"Error parsing player number: {e}")
                     self.running = False
