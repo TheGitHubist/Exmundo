@@ -173,7 +173,7 @@ class GameServer:
                 print(f"Error handling client {self.addr}: {e}")
                 break
 
-            await self.disconnect(reader, writer)
+        await self.disconnect(reader, writer)
 
 async def main():
     game_server = GameServer()
