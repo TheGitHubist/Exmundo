@@ -161,6 +161,7 @@ class GameServer:
                 await player_writer.drain()
 
         while True:
+            self.game_manager.current_player= 1
             try:
                 message = await self.read_client(reader, writer)
                 if message == False:
