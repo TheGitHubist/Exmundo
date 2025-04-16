@@ -48,60 +48,22 @@ class GameServer:
                     elif self.player_number == 2:
                         self.game_manager.player2_deck.choice_deck(int(parts[1]))
 
-    async def handle_client_msg(self, reader, writer):
-        addr = writer.get_extra_info('peername')
+    async def read_client(self, reader,writer):
+        data = await reader.read(1024)
+        if data == b'':
+            return False     
+        message = data.decode()
 
-        # Assign player number
-        if len(self.connected_players) >= 2:
-            writer.write("Game is full".encode())
-            await writer.drain()
-            writer.close()
-            await writer.wait_closed()
-            return
+        self.player_number = self.connected_players.get(writer, None)
+        if self.player_number is None:
+            print(f"Received message from unknown player {self.addr}")
+            return False  
 
-        # Assign next available player number (1 or 2)
-        assigned_numbers = set(self.connected_players.values())
-        if 1 not in assigned_numbers:
-            self.player_number = 1
-        elif 2 not in assigned_numbers:
-            self.player_number = 2
-        else:
-            # Should not happen due to earlier check
-            writer.write("Game is full".encode())
-            await writer.drain()
-            writer.close()
-            await writer.wait_closed()
-            return
+        print(f"Received message from player {self.player_number}: {message}")
+        return message
 
-        self.connected_players[writer] = self.player_number
-        writer.write(f"Player {self.player_number}".encode())
-        await writer.drain()
-        print(f"Player {self.player_number} connected from {addr}")
-
-        if len(self.connected_players) == 2:
-            self.game_manager.game_started = True
-            print("Game started with 2 players!")
-            # Notify both players that game has started
-            for player_writer in self.connected_players.keys():
-                player_writer.write("Game started".encode())
-                await player_writer.drain()
-
-        while True:
-            try:
-                data = await reader.read(1024)
-                if data == b'':
-                    break
-                        
-                message = data.decode()
-                self.getdeck(message)
-                self.player_number = self.connected_players.get(writer, None)
-                if self.player_number is None:
-                    print(f"Received message from unknown player {addr}")
-                    break
-
-                print(f"Received message from player {self.player_number}: {message}")
-
-                if message == "draw_card":
+    async def draw_card(self,message,writer):
+        if message == "draw_card":
                     if self.game_manager.is_player_turn(self.player_number):
                         card = self.game_manager.draw_card(self.player_number)
                         if card:
@@ -137,8 +99,55 @@ class GameServer:
                     else:
                         print(f"Not player's turn! : {self.game_manager.current_player}, {self.player_number}")
 
+
+    async def handle_client_msg(self, reader, writer):
+        self.addr = writer.get_extra_info('peername')
+
+        # Assign player number
+        if len(self.connected_players) >= 2:
+            writer.write("Game is full".encode())
+            await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+            return
+
+        # Assign next available player number (1 or 2)
+        assigned_numbers = set(self.connected_players.values())
+        if 1 not in assigned_numbers:
+            self.player_number = 1
+        elif 2 not in assigned_numbers:
+            self.player_number = 2
+        else:
+            # Should not happen due to earlier check
+            writer.write("Game is full".encode())
+            await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+            return
+
+        self.connected_players[writer] = self.player_number
+        writer.write(f"Player {self.player_number}".encode())
+        await writer.drain()
+        print(f"Player {self.player_number} connected from {self.addr}")
+
+        if len(self.connected_players) == 2:
+            self.game_manager.game_started = True
+            print("Game started with 2 players!")
+            # Notify both players that game has started
+            for player_writer in self.connected_players.keys():
+                player_writer.write("Game started".encode())
+                await player_writer.drain()
+
+        while True:
+            try:
+                message = self.read_client(self, reader)
+                if message == False:
+                    break
+                self.getdeck(message)
+                self.draw_card(message,writer)
+                self.draw_card(message,writer)
             except Exception as e:
-                print(f"Error handling client {addr}: {e}")
+                print(f"Error handling client {self.addr}: {e}")
                 break
 
         # Handle player disconnection and log the event
@@ -146,7 +155,7 @@ class GameServer:
             self.player_number = self.connected_players[writer]
             del self.connected_players[writer]
         else:
-            print(f"Warning: Tried to remove player {addr} but not found in connected_players.")
+            print(f"Warning: Tried to remove player {self.addr} but not found in connected_players.")
         writer.close()
         await writer.wait_closed()
         print(f"Player {self.player_number} disconnected")
