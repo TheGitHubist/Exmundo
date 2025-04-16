@@ -286,7 +286,7 @@ class GameClient:
             # Wait a bit to ensure initial messages are received
             await asyncio.sleep(0.5)
             
-            await self.init_send(writer)
+            #await self.init_send(writer)
             
             while self.running:
                 await self.handle_input(writer)
