@@ -246,7 +246,7 @@ class GameClient:
                     await writer.drain()
                     
     async def init_send(self, writer):
-        writer.write(f"569".encode())
+        writer.write(f"569 {self.deck_choice}".encode())
         await writer.drain()
 
     async def receive(self, reader, writer):
