@@ -16,12 +16,12 @@ pygame.init()
 class GameServer:
     def __init__(self):
         self.game_manager = GameManager()
-        self.connected_players = []
+        self.connected_players = {}  # Map writer to player_number
         self.images_path = Path(__file__).parent.parent / 'images'
         self.game_started = False
         print(f"Server images path: {self.images_path}")
         print(f"Images path exists: {self.images_path.exists()}")
-    
+
         # Load available card images
         self.available_cards = [f.name for f in self.images_path.glob('*.png')]
         print(f"Available cards: {self.available_cards}")
@@ -33,7 +33,7 @@ class GameServer:
                 print(f"Card {card} exists: {card_path.exists()}")
                 print(f"Card {card} is file: {card_path.is_file()}")
                 print(f"Card {card} full path: {card_path.absolute()}")
-                
+
                 # Test load each image
                 try:
                     test_image = pygame.image.load(str(card_path))
@@ -44,14 +44,30 @@ class GameServer:
 
     async def handle_client_msg(self, reader, writer):
         addr = writer.get_extra_info('peername')
-        player_number = len(self.connected_players) + 1
-        
-        if player_number > 2:
+
+        # Assign player number
+        if len(self.connected_players) >= 2:
             writer.write("Game is full".encode())
             await writer.drain()
+            writer.close()
+            await writer.wait_closed()
             return
 
-        self.connected_players.append((addr, writer))
+        # Assign next available player number (1 or 2)
+        assigned_numbers = set(self.connected_players.values())
+        if 1 not in assigned_numbers:
+            player_number = 1
+        elif 2 not in assigned_numbers:
+            player_number = 2
+        else:
+            # Should not happen due to earlier check
+            writer.write("Game is full".encode())
+            await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+            return
+
+        self.connected_players[writer] = player_number
         writer.write(f"Player {player_number}".encode())
         await writer.drain()
         print(f"Player {player_number} connected from {addr}")
@@ -60,9 +76,9 @@ class GameServer:
             self.game_started = True
             print("Game started with 2 players!")
             # Notify both players that game has started
-            for _, writer in self.connected_players:
-                writer.write("Game started".encode())
-                await writer.drain()
+            for player_writer in self.connected_players.keys():
+                player_writer.write("Game started".encode())
+                await player_writer.drain()
 
         while True:
             try:
@@ -71,6 +87,10 @@ class GameServer:
                     break
 
                 message = data.decode()
+                player_number = self.connected_players.get(writer, None)
+                if player_number is None:
+                    print(f"Received message from unknown player {addr}")
+                    break
 
                 print(f"Received message from player {player_number}: {message}")
 
@@ -95,7 +115,7 @@ class GameServer:
                             print(f"Sending card data: {response}")
 
                             # Send to all players and wait for each to complete
-                            for _, player_writer in self.connected_players:
+                            for player_writer in self.connected_players.keys():
                                 player_writer.write(response.encode())
                                 await player_writer.drain()
                                 print(f"Card data sent to player")
@@ -108,7 +128,7 @@ class GameServer:
                                 "type": "turn_change",
                                 "current_player": self.game_manager.get_current_player()
                             })
-                            for _, player_writer in self.connected_players:
+                            for player_writer in self.connected_players.keys():
                                 player_writer.write(turn_msg.encode())
                                 await player_writer.drain()
                                 print(f"Turn change sent to player")
@@ -124,20 +144,21 @@ class GameServer:
                 break
 
         # Handle player disconnection
-        try:
-            self.connected_players.remove((addr, writer))
-        except ValueError:
+        if writer in self.connected_players:
+            player_number = self.connected_players[writer]
+            del self.connected_players[writer]
+        else:
             print(f"Warning: Tried to remove player {addr} but not found in connected_players.")
         writer.close()
         await writer.wait_closed()
         print(f"Player {player_number} disconnected")
-        
+
         # Reset game state if a player disconnects
         self.game_started = False
         self.game_manager = GameManager()  # Reset game manager
-        
+
         # Notify remaining players about disconnection
-        for _, remaining_writer in self.connected_players:
+        for remaining_writer in self.connected_players.keys():
             try:
                 remaining_writer.write("Player disconnected".encode())
                 await remaining_writer.drain()
