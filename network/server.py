@@ -19,8 +19,6 @@ class GameServer:
         self.connected_players = {}  # Map writer to player_number
         self.images_path = Path(__file__).parent.parent / 'images'
         self.game_started = False
-        self.game_manager.player1_deck.choice_deck(0)
-        self.game_manager.player2_deck.choice_deck(0)
         print(f"Server images path: {self.images_path}")
         print(f"Images path exists: {self.images_path.exists()}")
 
@@ -87,6 +85,15 @@ class GameServer:
                 data = await reader.read(1024)
                 if data == b'':
                     break
+                        
+                parts = message.split()
+                if len(parts) > 1 and parts[0] == "569":
+                    if player_number == 1:
+                        self.game_manager.player1_deck.choice_deck(parts[1])
+                        print(f"print code: {parts[0]}")
+                    elif player_number == 2:
+                        self.game_manager.player2_deck.choice_deck(parts[1])
+                        print(f"print code: {parts[0]}")
 
                 message = data.decode()
                 player_number = self.connected_players.get(writer, None)
