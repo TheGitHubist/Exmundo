@@ -102,7 +102,7 @@ class GameServer:
 
         while True:
             try:
-                message = await self.read_client(self, reader, writer)
+                message = await self.read_client(reader, writer)
                 if message == False:
                     break
                 await self.getdeck(message)
