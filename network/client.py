@@ -234,7 +234,6 @@ class GameClient:
         pygame.display.flip()
 
     async def handle_input(self, writer):
-        writer.write(f"569 {self.deck_choice}".encode())
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -245,6 +244,10 @@ class GameClient:
                     print(f"Player {self.player_number} requesting card draw")
                     writer.write("draw_card".encode())
                     await writer.drain()
+                    
+    async def init_send(self, writer):
+        writer.write(f"569 {self.deck_choice}".encode())
+        await writer.drain()
 
     async def receive(self, reader, writer):
         while self.running:
@@ -269,6 +272,8 @@ class GameClient:
             # Wait a bit to ensure initial messages are received
             await asyncio.sleep(0.5)
             
+            self.init_send(writer)
+            
             while self.running:
                 await self.handle_input(writer)
                 await self.draw_game_state()
@@ -289,4 +294,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
