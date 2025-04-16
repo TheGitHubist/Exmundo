@@ -99,7 +99,7 @@ class GameClient:
                 self.current_player = data["current_player"]
                 print(f"Turn changed to player {self.current_player}")
         except json.JSONDecodeError:
-            if message == " Game started":
+            if message == "789":
                 print("Game has started!")
                 self.game_started = True
                 # Wait a bit longer to ensure player number is set
