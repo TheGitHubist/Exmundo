@@ -87,8 +87,8 @@ class GameServer:
                     break
                         
                 message = data.decode()
-                print(message)
                 parts = message.split()
+                print(parts)
                 if len(parts) > 1 and parts[0] == "569":
                     if player_number == 1:
                         self.game_manager.player1_deck.choice_deck(parts[1])
