@@ -102,10 +102,10 @@ class GameServer:
 
         while True:
             try:
-                message = self.read_client(self, reader)
+                message = await self.read_client(self, reader)
                 if message == False:
                     break
-                self.getdeck(message)
+                await self.getdeck(message)
                 if message == "draw_card":
                     if self.game_manager.is_player_turn(self.player_number):
                         card = self.game_manager.draw_card(self.player_number)
