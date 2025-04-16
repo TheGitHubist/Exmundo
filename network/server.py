@@ -100,28 +100,7 @@ class GameServer:
                 print(f"Not player's turn! : {self.game_manager.current_player}, {self.player_number}")
 
     async def disconnect(self, reader, writer):
-        # Handle player disconnection and log the event
-        if writer in self.connected_players:
-            self.player_number = self.connected_players[writer]
-            del self.connected_players[writer]
-        else:
-            print(f"Warning: Tried to remove player {self.addr} but not found in connected_players.")
-        writer.close()
-        await writer.wait_closed()
-        print(f"Player {self.player_number} disconnected")
-
-        # Reset game state if a player disconnects
-        self.game_manager.game_started = False
-        self.game_manager = GameManager()  # Reset game manager
-
-        # Notify remaining players about disconnection
-        for remaining_writer in self.connected_players.keys():
-            try:
-                remaining_writer.write("Player disconnected".encode())
-                await remaining_writer.drain()
-            except Exception as e:
-                print(f"Error notifying remaining player: {e}")
-
+        pass
     async def handle_client_msg(self, reader, writer):
         self.addr = writer.get_extra_info('peername')
 
@@ -173,7 +152,27 @@ class GameServer:
                 print(f"Error handling client {self.addr}: {e}")
                 break
 
-        self.disconnect(self, reader, writer)
+        # Handle player disconnection and log the event
+        if writer in self.connected_players:
+            self.player_number = self.connected_players[writer]
+            del self.connected_players[writer]
+        else:
+            print(f"Warning: Tried to remove player {self.addr} but not found in connected_players.")
+        writer.close()
+        await writer.wait_closed()
+        print(f"Player {self.player_number} disconnected")
+
+        # Reset game state if a player disconnects
+        self.game_manager.game_started = False
+        self.game_manager = GameManager()  # Reset game manager
+
+        # Notify remaining players about disconnection
+        for remaining_writer in self.connected_players.keys():
+            try:
+                remaining_writer.write("Player disconnected".encode())
+                await remaining_writer.drain()
+            except Exception as e:
+                print(f"Error notifying remaining player: {e}")
 
 async def main():
     game_server = GameServer()
