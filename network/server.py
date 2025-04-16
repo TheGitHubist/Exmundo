@@ -19,6 +19,8 @@ class GameServer:
         self.connected_players = []
         self.images_path = Path(__file__).parent.parent / 'images'
         self.game_started = False
+        self.game_manager.player1_deck.choice_deck(0)
+        self.game_manager.player2_deck.choice_deck(0)
         print(f"Server images path: {self.images_path}")
         print(f"Images path exists: {self.images_path.exists()}")
     
@@ -78,10 +80,8 @@ class GameServer:
                 if len(parts) > 1 and parts[0] == "569":
                     if player_number == 1:
                         self.game_manager.player1_deck.choice_deck(parts[1])
-                        print(f"player 1 : {self.game_manager.player1_deck.deckcard.card_list}")
                     elif player_number == 2:
                         self.game_manager.player2_deck.choice_deck(parts[1])
-                        print(f"player 2 : {self.game_manager.player2_deck.deckcard.card_list}")
 
                 if message == "draw_card":
                     if self.game_manager.is_player_turn(player_number):
