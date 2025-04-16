@@ -272,9 +272,9 @@ class GameClient:
             # Wait a bit to ensure initial messages are received
             await asyncio.sleep(0.5)
             
-            await self.init_send(writer)
             
             while self.running:
+                await self.init_send(writer)
                 await self.handle_input(writer)
                 await self.draw_game_state()
                 await asyncio.sleep(0.016)  # ~60 FPS
