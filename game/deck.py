@@ -61,7 +61,12 @@ class PlayerDeck(Deck):
         return False 
 
     def choice_deck(self, choice):
-        self.deckcard = DeckCard(choice)
+        try:
+            choice_index = int(choice)  # Ensure choice is an integer
+            self.deckcard = DeckCard(choice_index)
+        except (ValueError, IndexError) as e:
+            print(f"Invalid choice for deck: {choice}. Error: {e}")
+            return  # Handle invalid choice gracefully
         # Update self.cards with the cards from the chosen deck
         self.cards = list(self.deckcard.card_list)
 
