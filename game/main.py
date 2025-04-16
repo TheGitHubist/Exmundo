@@ -2,8 +2,7 @@ import pygame as pg
 from network.client import GameClient
 import asyncio
 from pathlib import Path
-from mecanics import Turn
-from deck import PlayerDeck as Player
+from game_manager import GameManager
 
 def main():
     connection_status = ""
@@ -14,17 +13,17 @@ def main():
     running = True
     asyncio.set_event_loop(asyncio.new_event_loop())
 
-    player = Player()
-    turn = Turn(player)
+    game_manager = GameManager()
+    game_manager.start_game()  # Start the game and deal initial hands
 
     while running:
         for event in pg.event.get(): 
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 connection_status = "You are connected"
-                #asyncio.create_task(send_message("Hello, Server!"))
-                drawn_card = turn.drawPhase()
-                if drawn_card:
-                    drawn_card_image = pg.image.load(f'images/{drawn_card["art"]}')
+                if game_manager.is_player_turn(game_manager.get_current_player()):
+                    drawn_card = game_manager.draw_card(game_manager.get_current_player())
+                    if drawn_card:
+                        drawn_card_image = pg.image.load(f'images/{drawn_card["art"]}')
 
             if event.type == pg.QUIT:
                 running = False
