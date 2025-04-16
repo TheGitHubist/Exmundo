@@ -150,7 +150,7 @@ class GameServer:
                 print(f"Error handling client {addr}: {e}")
                 break
 
-        # Handle player disconnection
+        # Handle player disconnection and log the event
         if writer in self.connected_players:
             player_number = self.connected_players[writer]
             del self.connected_players[writer]

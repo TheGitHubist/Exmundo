@@ -1,4 +1,5 @@
 import pygame as pg
+from network.client import GameClient
 import asyncio
 from pathlib import Path
 from mecanics import Turn
