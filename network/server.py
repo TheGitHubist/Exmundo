@@ -62,44 +62,6 @@ class GameServer:
         print(f"Received message from player {self.player_number}: {message}")
         return message
 
-    async def draw_card(self,message,writer):
-        if message == "draw_card":
-                    if self.game_manager.is_player_turn(self.player_number):
-                        card = self.game_manager.draw_card(self.player_number)
-                        if card:
-                            response = json.dumps({
-                                "type": "card_drawn",
-                                "player": self.player_number,
-                                "card": card.to_dict() if hasattr(card, "to_dict") else str(card)
-                            })
-                            print(f"Sending card data: {response}")
-
-                            # Send to all players and wait for each to complete
-                            for player_writer in self.connected_players.keys():
-                                player_writer.write(response.encode())
-                                await player_writer.drain()
-                                print(f"Card data sent to player")
-
-                            # Wait a small delay to ensure messages are sent
-                            await asyncio.sleep(0.1)
-
-                            # Send turn change message
-                            turn_msg = json.dumps({
-                                "type": "turn_change",
-                                "current_player": self.game_manager.get_current_player()
-                            })
-                            for player_writer in self.connected_players.keys():
-                                player_writer.write(turn_msg.encode())
-                                await player_writer.drain()
-                                print(f"Turn change sent to player")
-
-                            self.game_manager.switch_player()
-                        else:
-                            print("No cards available to draw!")
-                    else:
-                        print(f"Not player's turn! : {self.game_manager.current_player}, {self.player_number}")
-
-
     async def handle_client_msg(self, reader, writer):
         self.addr = writer.get_extra_info('peername')
 
@@ -144,8 +106,42 @@ class GameServer:
                 if message == False:
                     break
                 self.getdeck(message)
-                self.draw_card(message,writer)
-                self.draw_card(message,writer)
+                if message == "draw_card":
+                    if self.game_manager.is_player_turn(self.player_number):
+                        card = self.game_manager.draw_card(self.player_number)
+                        if card:
+                            response = json.dumps({
+                                "type": "card_drawn",
+                                "player": self.player_number,
+                                "card": card.to_dict() if hasattr(card, "to_dict") else str(card)
+                            })
+                            print(f"Sending card data: {response}")
+
+                            # Send to all players and wait for each to complete
+                            for player_writer in self.connected_players.keys():
+                                player_writer.write(response.encode())
+                                await player_writer.drain()
+                                print(f"Card data sent to player")
+
+                            # Wait a small delay to ensure messages are sent
+                            await asyncio.sleep(0.1)
+
+                            # Send turn change message
+                            turn_msg = json.dumps({
+                                "type": "turn_change",
+                                "current_player": self.game_manager.get_current_player()
+                            })
+                            for player_writer in self.connected_players.keys():
+                                player_writer.write(turn_msg.encode())
+                                await player_writer.drain()
+                                print(f"Turn change sent to player")
+
+                            self.game_manager.switch_player()
+                        else:
+                            print("No cards available to draw!")
+                    else:
+                        print(f"Not player's turn! : {self.game_manager.current_player}, {self.player_number}")
+
             except Exception as e:
                 print(f"Error handling client {self.addr}: {e}")
                 break
