@@ -48,7 +48,7 @@ class GameServer:
                     elif self.player_number == 2:
                         self.game_manager.player2_deck.choice_deck(int(parts[1]))
 
-    async def read_client(self, reader,writer):
+    async def read_client(self, reader, writer):
         data = await reader.read(1024)
         if data == b'':
             return False     
@@ -102,7 +102,7 @@ class GameServer:
 
         while True:
             try:
-                message = await self.read_client(self, reader)
+                message = await self.read_client(self, reader, writer)
                 if message == False:
                     break
                 await self.getdeck(message)
