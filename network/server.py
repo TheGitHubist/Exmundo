@@ -142,7 +142,7 @@ class GameServer:
                         else:
                             print("No cards available to draw!")
                     else:
-                        print(f"Not player's turn! : {player_number}")
+                        print(f"Not player's turn! : {self.game_manager.is_player_turn(player_number)}")
 
             except Exception as e:
                 print(f"Error handling client {addr}: {e}")
