@@ -88,13 +88,12 @@ class GameServer:
                         
                 message = data.decode()
                 parts = message.split()
-                print(parts)
                 if len(parts) > 1 and parts[0] == "569":
                     if player_number == 1:
-                        self.game_manager.player1_deck.choice_deck(parts[1])
-                        print(f"print code: {parts[0]}")
+                        self.game_manager.player1_deck.choice_deck(int(parts[1]))
+                        print(f"print code: {int(parts[0])}")
                     elif player_number == 2:
-                        self.game_manager.player2_deck.choice_deck(parts[1])
+                        self.game_manager.player2_deck.choice_deck(int(parts[1]))
                         print(f"print code: {parts[0]}")
 
                 player_number = self.connected_players.get(writer, None)
