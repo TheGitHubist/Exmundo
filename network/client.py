@@ -116,6 +116,9 @@ class GameClient:
             elif message == "Player disconnected":
                 print("Player disconnected")
                 self.running = False
+                # Optionally, you can add logic to reconnect or handle the disconnection gracefully
+                print("Player disconnected")
+                self.running = False
             elif message.startswith("Player"):
                 import re
                 try:
