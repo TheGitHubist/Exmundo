@@ -14,4 +14,4 @@ def read_message(x,y):
         else:
             return ""
     a = json.load(open('./game/data/Message.json'))
-    return a[x]
+    return a[x][y]
