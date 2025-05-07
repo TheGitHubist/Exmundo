@@ -44,7 +44,7 @@ class GameClient(Screen):
         self.deck_choice = 0
 
     async def init_send(self, writer):
-        writer.write(f"{"deck_choice": 205}Ex{self.deck_choice}".encode())
+        writer.write(f"{read_message(1,'deck_choice')}[]{self.deck_choice}".encode())
         await writer.drain()
 
     def handle_resize(self, event):
@@ -110,7 +110,7 @@ class GameClient(Screen):
         for i in range(5):
             debug(f"Drawing initial card {i+1}/5 for player {self.player_number}",False)
             card = self.game_manager.player_deck.draw_to_hand()
-            writer.write(f"{"code":206}[]{card}".encode())
+            writer.write(f"{read_message(1,'My card')}[]{card}".encode())
             await writer.drain()
             # Wait longer between draws to ensure server processes each request
             await asyncio.sleep(0.5)
