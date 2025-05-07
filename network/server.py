@@ -179,11 +179,12 @@ class GameServer:
         await self.disconnect(reader, writer)
 
 async def main():
+    await debug("Testing",True)
     game_server = GameServer()
     server = await asyncio.start_server(game_server.handle_client_msg, '', port)
     
     addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
-    debug(f'Server running on {addrs}',False)
+    debug(f'Server running on {addrs}',True)
 
     async with server:
         await server.serve_forever()
