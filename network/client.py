@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 
 from game.deck import PlayerDeck as Player
+from game.debug import debug
 
 pygame.init()
 
@@ -45,20 +46,20 @@ class GameClient:
         self.font = pygame.font.Font(None, int(self.window_height * 0.04))  # Scale font size
         self.running = True
         self.images_path = Path(__file__).parent.parent / 'images'
-        print(f"Client images path: {self.images_path}")
-        print(f"Images path exists: {self.images_path.exists()}")
-        print(f"Images path absolute: {self.images_path.absolute()}")
+        debug(f"Client images path: {self.images_path}",False)
+        debug(f"Images path exists: {self.images_path.exists()}",False)
+        debug(f"Images path absolute: {self.images_path.absolute()}",False)
         
         # Check if images directory exists and has files
         if not self.images_path.exists():
-            print(f"ERROR: Images directory not found at {self.images_path}")
+            debug(f"ERROR: Images directory not found at {self.images_path}",False)
         else:
             available_images = list(self.images_path.glob('*.png'))
-            print(f"Available images in directory: {[f.name for f in available_images]}")
+            debug(f"Available images in directory: {[f.name for f in available_images]}",False)
             for img in available_images:
-                print(f"Image {img.name} exists: {img.exists()}")
-                print(f"Image {img.name} is file: {img.is_file()}")
-                print(f"Image {img.name} full path: {img.absolute()}")
+                debug(f"Image {img.name} exists: {img.exists()}",False)
+                debug(f"Image {img.name} is file: {img.is_file()}",False)
+                debug(f"Image {img.name} full path: {img.absolute()}",False)
                 pass
 
     def handle_resize(self, event):
@@ -70,54 +71,54 @@ class GameClient:
         self.font = pygame.font.Font(None, int(self.window_height * 0.04))
 
     async def handle_server_message(self, message, writer):
-        print(f"Received message: {message}")
+        debug(f"Received message: {message}",False)
         try:
             data = json.loads(message)
             if data["type"] == "card_drawn":
                 player = data["player"]
                 card = data["card"]
-                print(f"Received card data: {card}")
-                print(f"Card art path: {self.images_path / card['art']}")
-                print(f"Card art exists: {(self.images_path / card['art']).exists()}")
+                debug(f"Received card data: {card}",False)
+                debug(f"Card art path: {self.images_path / card['art']}",False)
+                debug(f"Card art exists: {(self.images_path / card['art']).exists()}",False)
                 
                 # Store the card data
                 if player not in self.drawn_cards:
                     self.drawn_cards[player] = []
                 self.drawn_cards[player].append(card)
                 self.last_draw_time = pygame.time.get_ticks()  # Start animation
-                print(f"Card drawn for player {player}: {card}")
-                print(f"Current drawn cards: {self.drawn_cards}")
+                debug(f"Card drawn for player {player}: {card}",False)
+                debug(f"Current drawn cards: {self.drawn_cards}",False)
                 
                 # Test load the image immediately
                 try:
                     image_path = self.images_path / card["art"]
                     if image_path.exists():
                         test_image = pygame.image.load(str(image_path))
-                        print(f"Successfully loaded test image: {test_image.get_size()}")
+                        debug(f"Successfully loaded test image: {test_image.get_size()}",False)
                     else:
-                        print(f"ERROR: Image file not found at {image_path}")
+                        debug(f"ERROR: Image file not found at {image_path}",False)
                 except Exception as e:
-                    print(f"Error testing image load: {e}")
+                    debug(f"Error testing image load: {e}",False)
                     
             elif data["type"] == "turn_change":
                 self.current_player = data["current_player"]
-                print(f"Turn changed to player {self.current_player}")
+                debug(f"Turn changed to player {self.current_player}",False)
         except json.JSONDecodeError:
             if message == "Game started":
-                print("Game has started!")
+                debug("Game has started!",False)
                 self.game_started = True
                 # Wait a bit longer to ensure player number is set
                 await asyncio.sleep(1.0)
                 if self.player_number is not None:
-                    print(f"Starting initial card draw for player {self.player_number}")
+                    debug(f"Starting initial card draw for player {self.player_number}",False)
                     await self.draw_initial_cards(writer)
                 else:
-                    print("ERROR: Player number not set when game started!")
+                    debug("ERROR: Player number not set when game started!",False)
             elif message == "Player disconnected":
-                print("Player disconnected")
+                debug("Player disconnected",False)
                 self.running = False
                 # Optionally, you can add logic to reconnect or handle the disconnection gracefully
-                print("Player disconnected")
+                debug("Player disconnected",False)
                 self.running = False
             elif message.startswith("Player"):
                 import re
@@ -127,15 +128,15 @@ class GameClient:
                     match = re.match(r"(\d+)", player_str)
                     if match:
                         self.player_number = int(match.group(1))
-                        print(f"You are Player {self.player_number}")
+                        debug(f"You are Player {self.player_number}",False)
                         # If game has already started, draw initial cards
                         if self.game_started:
-                            print(f"Game already started, drawing initial cards for player {self.player_number}")
+                            debug(f"Game already started, drawing initial cards for player {self.player_number}",False)
                             await self.draw_initial_cards(writer)
                     else:
                         raise ValueError(f"No valid player number found in '{player_str}'")
                 except ValueError as e:
-                    print(f"Error parsing player number: {e}")
+                    debug(f"Error parsing player number: {e}",False)
                     self.running = False
 
     def draw_card_with_animation(self, card_image, start_pos, end_pos, progress):
@@ -154,20 +155,20 @@ class GameClient:
     async def draw_initial_cards(self, writer):
         """Draw 5 cards for each player at game start"""
         if self.initial_cards_drawn or self.player_number is None:
-            print(f"Skipping initial card draw - drawn: {self.initial_cards_drawn}, player: {self.player_number}")
+            debug(f"Skipping initial card draw - drawn: {self.initial_cards_drawn}, player: {self.player_number}",False)
             return
             
-        print(f"Starting initial card draw for player {self.player_number}")
+        debug(f"Starting initial card draw for player {self.player_number}",False)
         # Draw 5 cards for the current player
         for i in range(5):
-            print(f"Drawing initial card {i+1}/5 for player {self.player_number}")
+            debug(f"Drawing initial card {i+1}/5 for player {self.player_number}",False)
             writer.write("draw_card".encode())
             await writer.drain()
             # Wait longer between draws to ensure server processes each request
             await asyncio.sleep(0.5)
             
         self.initial_cards_drawn = True
-        print(f"Initial card draw complete for player {self.player_number}")
+        debug(f"Initial card draw complete for player {self.player_number}",False)
 
     async def draw_game_state(self):
         self.screen.fill((255, 255, 255))
@@ -186,7 +187,7 @@ class GameClient:
         current_time = pygame.time.get_ticks()
         animation_progress = min(1.0, (current_time - self.last_draw_time) / self.draw_animation_duration)
         
-        print(f"Drawing cards: {self.drawn_cards}")
+        debug(f"Drawing cards: {self.drawn_cards}",False)
         for player, cards in self.drawn_cards.items():
             if not isinstance(cards, list):
                 cards = [cards]  # Convert single card to list for compatibility
@@ -205,25 +206,25 @@ class GameClient:
                 if card and "art" in card:
                     try:
                         image_path = self.images_path / card["art"]
-                        print(f"Attempting to load image from: {image_path}")
-                        print(f"Image path exists: {image_path.exists()}")
-                        print(f"Image path is file: {image_path.is_file()}")
+                        debug(f"Attempting to load image from: {image_path}",False)
+                        debug(f"Image path exists: {image_path.exists()}",False)
+                        debug(f"Image path is file: {image_path.is_file()}",False)
                         
                         if not image_path.exists():
-                            print(f"ERROR: Image file not found at {image_path}")
+                            debug(f"ERROR: Image file not found at {image_path}",False)
                             continue
                             
                         card_image = pygame.image.load(str(image_path))
-                        print(f"Successfully loaded image: {card_image.get_size()}")
+                        debug(f"Successfully loaded image: {card_image.get_size()}",False)
                         
                         card_image = pygame.transform.scale(card_image, (self.card_width, self.card_height))
-                        print(f"Scaled image size: {card_image.get_size()}")
+                        debug(f"Scaled image size: {card_image.get_size()}",False)
                         
                         # Calculate x position - for current player, cards go right to left
                         # for opponent, cards go left to right
                         x_pos = start_x + i * (self.card_width + 10)
                         
-                        print(f"Drawing card at position: ({x_pos}, {y_pos})")
+                        debug(f"Drawing card at position: ({x_pos}, {y_pos})",False)
                         # Draw card with animation
                         start_pos = (self.window_width // 2, self.window_height // 2)  # Start from center
                         end_pos = (x_pos, y_pos)
@@ -237,7 +238,7 @@ class GameClient:
                             self.screen.blit(player_label, label_pos)
                         
                     except Exception as e:
-                        print(f"Error loading card image: {e}")
+                        debug(f"Error loading card image: {e}",False)
                         # Draw a placeholder rectangle if image loading fails
                         rect = pygame.Rect(x_pos, y_pos, self.card_width, self.card_height)
                         pygame.draw.rect(self.screen, (200, 200, 200), rect)
@@ -255,7 +256,7 @@ class GameClient:
                 self.handle_resize(event)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and self.current_player == self.player_number:
-                    print(f"Player {self.player_number} requesting card draw")
+                    debug(f"Player {self.player_number} requesting card draw",False)
                     writer.write("draw_card".encode())
                     await writer.drain()
                     
@@ -271,14 +272,14 @@ class GameClient:
                     message = data.decode()
                     await self.handle_server_message(message, writer)
             except Exception as e:
-                print(f"Error receiving data: {e}")
+                debug(f"Error receiving data: {e}",False)
                 break
 
     async def main(self):
         try:
-            print(f"Connecting to server at {self.host}:{self.port}")
+            debug(f"Connecting to server at {self.host}:{self.port}",False)
             reader, writer = await asyncio.open_connection(self.host, self.port)
-            print("Connected to server")
+            debug("Connected to server",False)
             
             # Start receiving messages
             receive_task = asyncio.create_task(self.receive(reader, writer))
@@ -298,7 +299,7 @@ class GameClient:
             await writer.wait_closed()
             
         except Exception as e:
-            print(f"Connection error: {e}")
+            debug(f"Connection error: {e}",False)
         finally:
             pygame.quit()
 
