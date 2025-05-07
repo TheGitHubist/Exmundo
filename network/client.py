@@ -78,9 +78,9 @@ class GameClient(Screen):
             except ValueError as e:
                 debug(f"Error parsing player number: {e}",True)
                 self.stop()
-        elif message[0] is "106":
+        elif message[0] == "106":
             self.handle_input(self, writer)
-        elif message[0] is "110":
+        elif message[0] == "110":
             if message[1] == self.version:
                 writer.write(read_message(0,'Update Yes').encode())
             else:
