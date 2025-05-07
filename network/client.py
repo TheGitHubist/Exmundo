@@ -19,7 +19,6 @@ class GameClient:
         self.deck_choice = 0
         self.host = host
         self.port = port
-        self.player_number = None
         self.current_player = 1
         self.drawn_cards = {}  # Store drawn cards for both players
         self.last_draw_time = 0  # For animation
