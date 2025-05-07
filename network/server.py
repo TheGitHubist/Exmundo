@@ -21,7 +21,7 @@ class GameServer:
         # print(f"Server images path: {self.images_path}")
         # print(f"Images path exists: {self.images_path.exists()}")
 
-        # Load available card images
+        """ Load available card images """
         self.available_cards = [f.name for f in self.images_path.glob('*.png')]
         #print(f"Available cards: {self.available_cards}")
         if not self.available_cards:
@@ -40,6 +40,7 @@ class GameServer:
                 except Exception as e:
                     print(f"Error loading test image for {card}: {e}")
                     pass
+
     async def getdeck(self, message):
         parts = message.split()
         if len(parts) > 1 and parts[0] == "569":
@@ -51,7 +52,8 @@ class GameServer:
     async def read_client(self, reader, writer):
         data = await reader.read(1024)
         if data == b'':
-            return False     
+            return False   
+          
         message = data.decode()
 
         self.player_number = self.connected_players.get(writer, None)
@@ -160,7 +162,6 @@ class GameServer:
                 player_writer.write("Game started".encode())
                 await player_writer.drain()
 
-        self.game_manager.current_player= 1
         while True:
             try:
                 message = await self.read_client(reader, writer)
