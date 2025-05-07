@@ -95,7 +95,6 @@ class GameServer:
                 message = message.split("[]")
                 if message[0] == "202":
                     writer.write(read_message(1,'Update ?').encode())
-                    await writer.drain()
                 elif message[0] == "203":
                     debug(f"Player {self.player_number} Is Dumb")
                 elif message[0] == "204":
@@ -108,8 +107,7 @@ class GameServer:
                     debug(f"Player {self.player_number} as {message[1]}")
                 elif message[0] == "211":
                     debug(f"Player {self.player_number} as {message[1]}")
-                await self.getdeck(message)
-                
+                await writer.drain()
             except Exception as e:
                 debug(f"Error handling client {self.addr}: {e}",True)
                 break

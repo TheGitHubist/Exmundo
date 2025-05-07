@@ -85,7 +85,7 @@ class GameClient(Screen):
                 writer.write(read_message(0,'Update Yes').encode())
             else:
                 writer.write(read_message(0,'Update No').encode())
-            await writer.drain()
+        await writer.drain()
 
 
     def draw_card_with_animation(self, card_image, start_pos, end_pos, progress):
