@@ -28,7 +28,7 @@ class GameServer:
             debug(f"Received message from unknown player {self.addr}",True)
             return False  
 
-        debug(f"Received message from player {self.player_number}: {message}",True)
+        debug(f"Received message from player {self.player_number}: {message[0]}",True)
         return message
 
     async def disconnect(self, reader, writer):
@@ -100,7 +100,7 @@ class GameServer:
                 elif message[0] == "204":
                     debug("Download =}")
                 elif message[0] == "205":
-                    pass
+                    debug(f"Player {self.player_number} as {message[1]}")
                 elif message[0] == "206":
                     debug(f"Player {self.player_number} as {message[1]}")
                 elif message[0] == "210":
