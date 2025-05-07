@@ -23,6 +23,7 @@ class GameClient:
         self.drawn_cards = {}  # Store drawn cards for both players
         self.last_draw_time = 0  # For animation
         self.draw_animation_duration = 500  # milliseconds
+        self.initial_cards_drawn = False  # Track if initial cards have been drawn
         self.game_started = False  # Track if game has started
         
         # Get screen info and set up display
@@ -148,6 +149,9 @@ class GameClient:
 
     async def draw_initial_cards(self, writer):
         """Draw 5 cards for each player at game start"""
+        if self.initial_cards_drawn is False:
+            debug(f"Skipping initial card draw - drawn: {self.initial_cards_drawn}, player: {self.player_number}",True)
+            return
             
         debug(f"Starting initial card draw for player {self.player_number}",False)
         # Draw 5 cards for the current player
@@ -157,6 +161,9 @@ class GameClient:
             await writer.drain()
             # Wait longer between draws to ensure server processes each request
             await asyncio.sleep(0.5)
+            
+        self.initial_cards_drawn = True
+        debug(f"Initial card draw complete for player {self.player_number}",False)
 
     async def draw_game_state(self):
         self.screen.fill((255, 255, 255))
