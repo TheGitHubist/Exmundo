@@ -180,6 +180,7 @@ class GameServer:
 
 async def main():
     await debug("Testing")
+    print("Printesting")
     game_server = GameServer()
     server = await asyncio.start_server(game_server.handle_client_msg, '', port)
     
