@@ -52,7 +52,7 @@ class GameClient:
         
         # Check if images directory exists and has files
         if not self.images_path.exists():
-            debug(f"ERROR: Images directory not found at {self.images_path}",False)
+            debug(f"ERROR: Images directory not found at {self.images_path}",True)
         else:
             available_images = list(self.images_path.glob('*.png'))
             debug(f"Available images in directory: {[f.name for f in available_images]}",False)
@@ -96,9 +96,9 @@ class GameClient:
                         test_image = pygame.image.load(str(image_path))
                         debug(f"Successfully loaded test image: {test_image.get_size()}",False)
                     else:
-                        debug(f"ERROR: Image file not found at {image_path}",False)
+                        debug(f"ERROR: Image file not found at {image_path}",True)
                 except Exception as e:
-                    debug(f"Error testing image load: {e}",False)
+                    debug(f"Error testing image load: {e}",True)
                     
             elif data["type"] == "turn_change":
                 self.current_player = data["current_player"]
@@ -113,7 +113,7 @@ class GameClient:
                     debug(f"Starting initial card draw for player {self.player_number}",False)
                     await self.draw_initial_cards(writer)
                 else:
-                    debug("ERROR: Player number not set when game started!",False)
+                    debug("ERROR: Player number not set when game started!",True)
             elif message == "Player disconnected":
                 debug("Player disconnected",False)
                 self.running = False
@@ -136,7 +136,7 @@ class GameClient:
                     else:
                         raise ValueError(f"No valid player number found in '{player_str}'")
                 except ValueError as e:
-                    debug(f"Error parsing player number: {e}",False)
+                    debug(f"Error parsing player number: {e}",True)
                     self.running = False
 
     def draw_card_with_animation(self, card_image, start_pos, end_pos, progress):
@@ -211,7 +211,7 @@ class GameClient:
                         debug(f"Image path is file: {image_path.is_file()}",False)
                         
                         if not image_path.exists():
-                            debug(f"ERROR: Image file not found at {image_path}",False)
+                            debug(f"ERROR: Image file not found at {image_path}",True)
                             continue
                             
                         card_image = pygame.image.load(str(image_path))
@@ -238,7 +238,7 @@ class GameClient:
                             self.screen.blit(player_label, label_pos)
                         
                     except Exception as e:
-                        debug(f"Error loading card image: {e}",False)
+                        debug(f"Error loading card image: {e}",True)
                         # Draw a placeholder rectangle if image loading fails
                         rect = pygame.Rect(x_pos, y_pos, self.card_width, self.card_height)
                         pygame.draw.rect(self.screen, (200, 200, 200), rect)
@@ -272,7 +272,7 @@ class GameClient:
                     message = data.decode()
                     await self.handle_server_message(message, writer)
             except Exception as e:
-                debug(f"Error receiving data: {e}",False)
+                debug(f"Error receiving data: {e}",True)
                 break
 
     async def main(self):
