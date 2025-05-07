@@ -99,7 +99,7 @@ class GameServer:
                     debug(f"Player {self.player_number} Is Dumb")
                 elif message[0] == "204":
                     debug("Download =}")
-                elif message[0] == "205":
+                elif message[0] == 205:
                     debug(f"Player {self.player_number} as {message[1]}")
                 elif message[0] == "206":
                     debug(f"Player {self.player_number} as {message[1]}")
