@@ -110,7 +110,11 @@ class GameClient:
                 self.game_started = True
                 # Wait a bit longer to ensure player number is set
                 await asyncio.sleep(1.0)
-                await self.draw_initial_cards(writer)
+                if self.player_number is not None:
+                    debug(f"Starting initial card draw for player {self.player_number}",False)
+                    await self.draw_initial_cards(writer)
+                else:
+                    debug("ERROR: Player number not set when game started!",True)
             elif message == "Player disconnected":
                 debug("Player disconnected",False)
                 self.running = False
@@ -150,7 +154,7 @@ class GameClient:
 
     async def draw_initial_cards(self, writer):
         """Draw 5 cards for each player at game start"""
-        if self.initial_cards_drawn is None:
+        if self.initial_cards_drawn or self.player_number is None:
             debug(f"Skipping initial card draw - drawn: {self.initial_cards_drawn}, player: {self.player_number}",False)
             return
             
