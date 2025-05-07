@@ -9,6 +9,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from game.deck import PlayerDeck
 from game.game_manager import GameManager
+from game.debug import debug
 
 port = 3945
 pygame.init()
@@ -18,27 +19,27 @@ class GameServer:
         self.game_manager = GameManager()
         self.connected_players = {}  # Map writer to self.player_number
         self.images_path = Path(__file__).parent.parent / 'images'
-        # print(f"Server images path: {self.images_path}")
-        # print(f"Images path exists: {self.images_path.exists()}")
+        debug(f"Server images path: {self.images_path}",False)
+        debug(f"Images path exists: {self.images_path.exists()}",False)
 
         """ Load available card images """
         self.available_cards = [f.name for f in self.images_path.glob('*.png')]
-        #print(f"Available cards: {self.available_cards}")
+        debug(f"Available cards: {self.available_cards}",False)
         if not self.available_cards:
-            print("WARNING: No card images found!")
+            debug("WARNING: No card images found!",False)
         else:
             for card in self.available_cards:
                 card_path = self.images_path / card
-                # print(f"Card {card} exists: {card_path.exists()}")
-                # print(f"Card {card} is file: {card_path.is_file()}")
-                # print(f"Card {card} full path: {card_path.absolute()}")
+                debug(f"Card {card} exists: {card_path.exists()}",False)
+                debug(f"Card {card} is file: {card_path.is_file()}",False)
+                debug(f"Card {card} full path: {card_path.absolute()}",False)
 
                 # Test load each image
                 try:
                     test_image = pygame.image.load(str(card_path))
-                    print(f"Successfully loaded test image for {card}: {test_image.get_size()}")
+                    debug(f"Successfully loaded test image for {card}: {test_image.get_size()}",False)
                 except Exception as e:
-                    print(f"Error loading test image for {card}: {e}")
+                    debug(f"Error loading test image for {card}: {e}",False)
                     pass
 
     async def getdeck(self, message):
@@ -58,10 +59,10 @@ class GameServer:
 
         self.player_number = self.connected_players.get(writer, None)
         if self.player_number is None:
-            print(f"Received message from unknown player {self.addr}")
+            debug(f"Received message from unknown player {self.addr}",False)
             return False  
 
-        print(f"Received message from player {self.player_number}: {message}")
+        debug(f"Received message from player {self.player_number}: {message}",False)
         return message
 
     async def draw_card(self, message , reader, writer):
@@ -74,13 +75,13 @@ class GameServer:
                         "player": self.player_number,
                         "card": card.to_dict() if hasattr(card, "to_dict") else str(card)
                     })
-                    print(f"Sending card data: {response}")
+                    debug(f"Sending card data: {response}",False)
 
                     # Send to all players and wait for each to complete
                     for player_writer in self.connected_players.keys():
                         player_writer.write(response.encode())
                         await player_writer.drain()
-                        print(f"Card data sent to player")
+                        debug(f"Card data sent to player",False)
 
                     # Wait a small delay to ensure messages are sent
                     await asyncio.sleep(0.1)
@@ -93,13 +94,13 @@ class GameServer:
                     for player_writer in self.connected_players.keys():
                         player_writer.write(turn_msg.encode())
                         await player_writer.drain()
-                        print(f"Turn change sent to player")
+                        debug(f"Turn change sent to player",False)
 
                     self.game_manager.switch_player()
                 else:
-                    print("No cards available to draw!")
+                    debug("No cards available to draw!",False)
             else:
-                print(f"Not player's turn! : {self.game_manager.current_player}, {self.player_number}")
+                debug(f"Not player's turn! : {self.game_manager.current_player}, {self.player_number}",False)
 
     async def disconnect(self, reader, writer):
         # Handle player disconnection and log the event
@@ -107,10 +108,10 @@ class GameServer:
             self.player_number = self.connected_players[writer]
             del self.connected_players[writer]
         else:
-            print(f"Warning: Tried to remove player {self.addr} but not found in connected_players.")
+            debug(f"Warning: Tried to remove player {self.addr} but not found in connected_players.",False)
         writer.close()
         await writer.wait_closed()
-        print(f"Player {self.player_number} disconnected")
+        debug(f"Player {self.player_number} disconnected",False)
 
         # Reset game state if a player disconnects
         self.game_manager.game_started = False
@@ -122,7 +123,7 @@ class GameServer:
                 remaining_writer.write("Player disconnected".encode())
                 await remaining_writer.drain()
             except Exception as e:
-                print(f"Error notifying remaining player: {e}")
+                debug(f"Error notifying remaining player: {e}",False)
 
     async def handle_client_msg(self, reader, writer):
         self.addr = writer.get_extra_info('peername')
@@ -152,11 +153,11 @@ class GameServer:
         self.connected_players[writer] = self.player_number
         writer.write(f"Player {self.player_number}".encode())
         await writer.drain()
-        print(f"Player {self.player_number} connected from {self.addr}")
+        debug(f"Player {self.player_number} connected from {self.addr}",False)
 
         if len(self.connected_players) == 2:
             self.game_manager.game_started = True
-            print("Game started with 2 players!")
+            debug("Game started with 2 players!",False)
             # Notify both players that game has started
             for player_writer in self.connected_players.keys():
                 player_writer.write("Game started".encode())
@@ -172,7 +173,7 @@ class GameServer:
 
 
             except Exception as e:
-                print(f"Error handling client {self.addr}: {e}")
+                debug(f"Error handling client {self.addr}: {e}",False)
                 break
 
         await self.disconnect(reader, writer)
@@ -182,7 +183,7 @@ async def main():
     server = await asyncio.start_server(game_server.handle_client_msg, '', port)
     
     addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
-    print(f'Server running on {addrs}')
+    debug(f'Server running on {addrs}',False)
 
     async with server:
         await server.serve_forever()
