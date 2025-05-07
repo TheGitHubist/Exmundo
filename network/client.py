@@ -156,8 +156,7 @@ class GameClient(Screen):
 
 
 async def main():
-    scr = Screen()
-    client = GameClient(scr, "10.5.1.100", 3945)
+    client = GameClient("10.5.1.100", 3945)
     await client.main()
 
 if __name__ == "__main__":

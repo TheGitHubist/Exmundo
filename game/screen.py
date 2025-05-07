@@ -1,8 +1,8 @@
 import pygame
 pygame.init()
 
-class Screen():
-    def __init__():
+class Screen:
+    def __init__(self):
         pass
 
     def window_screen(self):

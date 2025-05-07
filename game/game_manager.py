@@ -1,5 +1,4 @@
 from .deck import PlayerDeck
-from network.client import GameClient
 
 class GameManager:
     def __init__(self):

@@ -7,7 +7,6 @@ from pathlib import Path
 # Add the parent directory to the Python path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from game.deck import PlayerDeck
 from game.debug import debug, read_message
 
 port = 3945
