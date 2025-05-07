@@ -150,7 +150,7 @@ class GameClient:
 
     async def draw_initial_cards(self, writer):
         """Draw 5 cards for each player at game start"""
-        if self.initial_cards_drawn or self.player_number is None:
+        if self.initial_cards_drawn is None:
             debug(f"Skipping initial card draw - drawn: {self.initial_cards_drawn}, player: {self.player_number}",False)
             return
             
