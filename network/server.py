@@ -8,47 +8,14 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from game.deck import PlayerDeck
-from game.game_manager import GameManager
-from game.debug import debug
+from game.debug import debug, read_message
 
 port = 3945
 pygame.init()
 
 class GameServer:
     def __init__(self):
-        self.game_manager = GameManager()
         self.connected_players = {}  # Map writer to self.player_number
-        self.images_path = Path(__file__).parent.parent / 'images'
-        debug(f"Server images path: {self.images_path}",False)
-        debug(f"Images path exists: {self.images_path.exists()}",False)
-
-        """ Load available card images """
-        self.available_cards = [f.name for f in self.images_path.glob('*.png')]
-        debug(f"Available cards: {self.available_cards}",False)
-        if not self.available_cards:
-            debug("WARNING: No card images found!",False)
-        else:
-            for card in self.available_cards:
-                card_path = self.images_path / card
-                debug(f"Card {card} exists: {card_path.exists()}",False)
-                debug(f"Card {card} is file: {card_path.is_file()}",False)
-                debug(f"Card {card} full path: {card_path.absolute()}",False)
-
-                # Test load each image
-                try:
-                    test_image = pygame.image.load(str(card_path))
-                    debug(f"Successfully loaded test image for {card}: {test_image.get_size()}",False)
-                except Exception as e:
-                    debug(f"Error loading test image for {card}: {e}",False)
-                    pass
-
-    async def getdeck(self, message):
-        parts = message.split()
-        if len(parts) > 1 and parts[0] == "569":
-                    if self.player_number == 1:
-                        self.game_manager.player1_deck.choice_deck(int(parts[1]))
-                    elif self.player_number == 2:
-                        self.game_manager.player2_deck.choice_deck(int(parts[1]))
 
     async def read_client(self, reader, writer):
         data = await reader.read(1024)
@@ -65,43 +32,6 @@ class GameServer:
         debug(f"Received message from player {self.player_number}: {message}",True)
         return message
 
-    async def draw_card(self, message , reader, writer):
-        if message == "draw_card":
-            if self.game_manager.is_player_turn(self.player_number):
-                card = self.game_manager.draw_card(self.player_number)
-                if card:
-                    response = json.dumps({
-                        "type": "card_drawn",
-                        "player": self.player_number,
-                        "card": card.to_dict() if hasattr(card, "to_dict") else str(card)
-                    })
-                    debug(f"Sending card data: {response}",True)
-
-                    # Send to all players and wait for each to complete
-                    for player_writer in self.connected_players.keys():
-                        player_writer.write(response.encode())
-                        await player_writer.drain()
-                        debug(f"Card data sent to player",True)
-
-                    # Wait a small delay to ensure messages are sent
-                    await asyncio.sleep(0.1)
-
-                    # Send turn change message
-                    turn_msg = json.dumps({
-                        "type": "turn_change",
-                        "current_player": self.game_manager.get_current_player()
-                    })
-                    for player_writer in self.connected_players.keys():
-                        player_writer.write(turn_msg.encode())
-                        await player_writer.drain()
-                        debug(f"Turn change sent to player",True)
-
-                    self.game_manager.switch_player()
-                else:
-                    debug("No cards available to draw!",True)
-            else:
-                debug(f"Not player's turn! : {self.game_manager.current_player}, {self.player_number}",True)
-
     async def disconnect(self, reader, writer):
         # Handle player disconnection and log the event
         if writer in self.connected_players:
@@ -113,28 +43,27 @@ class GameServer:
         await writer.wait_closed()
         debug(f"Player {self.player_number} disconnected",True)
 
-        # Reset game state if a player disconnects
-        self.game_manager.game_started = False
-        self.game_manager = GameManager()  # Reset game manager
-
         # Notify remaining players about disconnection
         for remaining_writer in self.connected_players.keys():
             try:
-                remaining_writer.write("Player disconnected".encode())
+                remaining_writer.write(read_message(1,'client down').encode())
                 await remaining_writer.drain()
             except Exception as e:
                 debug(f"Error notifying remaining player: {e}",True)
 
+    async def full_connection(self,reader,writer):
+        writer.write(read_message(1,'full client').encode())
+        await writer.drain()
+        writer.close()
+        await writer.wait_closed()
+        return
+    
     async def handle_client_msg(self, reader, writer):
         self.addr = writer.get_extra_info('peername')
 
         # Assign player number
         if len(self.connected_players) >= 2:
-            writer.write("Game is full".encode())
-            await writer.drain()
-            writer.close()
-            await writer.wait_closed()
-            return
+            self.full_connection(reader,writer)
 
         # Assign next available player number (1 or 2)
         assigned_numbers = set(self.connected_players.values())
@@ -144,23 +73,18 @@ class GameServer:
             self.player_number = 2
         else:
             # Should not happen due to earlier check
-            writer.write("Game is full".encode())
-            await writer.drain()
-            writer.close()
-            await writer.wait_closed()
-            return
+            self.full_connection(reader,writer)
 
         self.connected_players[writer] = self.player_number
-        writer.write(f"Player {self.player_number}".encode())
+        writer.write(f"{read_message(1,'assign number player')}[]{self.player_number}".encode())
         await writer.drain()
         debug(f"Player {self.player_number} connected from {self.addr}",False)
 
         if len(self.connected_players) == 2:
-            self.game_manager.game_started = True
             debug("Game started with 2 players!",False)
             # Notify both players that game has started
             for player_writer in self.connected_players.keys():
-                player_writer.write("Game started".encode())
+                player_writer.write(read_message(1,'start game').encode())
                 await player_writer.drain()
 
         while True:
@@ -168,10 +92,25 @@ class GameServer:
                 message = await self.read_client(reader, writer)
                 if message == False:
                     break
+
+                message = message.split("[]")
+                if message[0] is "202":
+                    writer.write(read_message(1,'Update ?').encode())
+                    await writer.drain()
+                elif message[0] is "203":
+                    debug(f"Player {self.player_number} Is Dumb")
+                elif message[0] is "204":
+                    debug("Download =}")
+                elif message[0] is "205":
+                    pass
+                elif message[0] is "206":
+                    debug(f"Player {self.player_number} as {message[1]}")
+                elif message[0] is "210":
+                    debug(f"Player {self.player_number} as {message[1]}")
+                elif message[0] is "211":
+                    debug(f"Player {self.player_number} as {message[1]}")
                 await self.getdeck(message)
-                await self.draw_card(message, reader, writer)
-
-
+                
             except Exception as e:
                 debug(f"Error handling client {self.addr}: {e}",True)
                 break

@@ -1,0 +1,22 @@
+{
+    "server":{
+        "client down": 101,
+        "code not found": 102,
+        "full client": 103,
+        "card not found": 104,
+        "assign number player": 105,
+        "start game": 106,
+        "Update ?": 110
+
+    },
+    "client":{
+        "server down": 201,
+        "code not found": 202,
+        "I Am Dumb" : 203,
+        "path not found": 204,
+        "deck_choice" : 205,
+        "My card" : 206,
+        "Update Yes" : 210,
+        "Update No" : 211
+    }
+}
