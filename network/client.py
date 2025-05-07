@@ -6,6 +6,7 @@ import asyncio
 import time
 import pygame
 import json
+import re
 from pathlib import Path
 
 from game.deck import PlayerDeck as Player
@@ -18,7 +19,6 @@ class GameClient:
         self.deck_choice = 0
         self.host = host
         self.port = port
-        self.player_number = None
         self.current_player = 1
         self.drawn_cards = {}  # Store drawn cards for both players
         self.last_draw_time = 0  # For animation
@@ -109,11 +109,7 @@ class GameClient:
                 self.game_started = True
                 # Wait a bit longer to ensure player number is set
                 await asyncio.sleep(1.0)
-                if self.player_number is not None:
-                    debug(f"Starting initial card draw for player {self.player_number}",False)
-                    await self.draw_initial_cards(writer)
-                else:
-                    debug("ERROR: Player number not set when game started!",True)
+                await self.draw_initial_cards(writer)
             elif message == "Player disconnected":
                 debug("Player disconnected",False)
                 self.running = False
@@ -121,7 +117,6 @@ class GameClient:
                 debug("Player disconnected",False)
                 self.running = False
             elif message.startswith("Player"):
-                import re
                 try:
                     # Extract leading digits from the second word after "Player"
                     player_str = message.split()[1]

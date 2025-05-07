@@ -71,10 +71,9 @@ class PlayerDeck(Deck):
         self.cards = list(self.deckcard.card_list)
 
 class DeckCard:
-    card_list = []
     def __init__(self, index):
         # Clear the class variable card_list to avoid accumulation
-        DeckCard.card_list = []
+        self.card_list = []
         data_list = json.load(open('./game/data/Decks.json'))
         card_list = data_list['deck'][index]['cards']
         for card in card_list:
