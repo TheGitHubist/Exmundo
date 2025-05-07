@@ -56,16 +56,16 @@ class GameClient(Screen):
     async def Reader_server_message(self, message, writer):
         debug(f"Received message: {message}",True)
         message = message.split("[]")
-        if message[0] is "101":
+        if message[0] == "101":
             debug("Client is down")
             self.stop()
-        elif message[0] is "102":
+        elif message[0] == "102":
             pass
-        elif message[0] is "103":
+        elif message[0] == "103":
             debug("Game is Full")
-        elif message[0] is "104":
+        elif message[0] == "104":
             debug("Card Npt Found")
-        elif message[0] is "105":
+        elif message[0] == "105":
             try:
                 # Extract leading digits from the second word after "Player"
                 player_str = message[1]

@@ -94,20 +94,20 @@ class GameServer:
                     break
 
                 message = message.split("[]")
-                if message[0] is "202":
+                if message[0] == "202":
                     writer.write(read_message(1,'Update ?').encode())
                     await writer.drain()
-                elif message[0] is "203":
+                elif message[0] == "203":
                     debug(f"Player {self.player_number} Is Dumb")
-                elif message[0] is "204":
+                elif message[0] == "204":
                     debug("Download =}")
-                elif message[0] is "205":
+                elif message[0] == "205":
                     pass
-                elif message[0] is "206":
+                elif message[0] == "206":
                     debug(f"Player {self.player_number} as {message[1]}")
-                elif message[0] is "210":
+                elif message[0] == "210":
                     debug(f"Player {self.player_number} as {message[1]}")
-                elif message[0] is "211":
+                elif message[0] == "211":
                     debug(f"Player {self.player_number} as {message[1]}")
                 await self.getdeck(message)
                 
