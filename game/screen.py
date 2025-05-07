@@ -31,6 +31,7 @@ class Screen:
 
     async def handle_input(self, writer):
         for event in pygame.event.get():
+            self.screen.fill((0,0,255))
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.VIDEORESIZE:
