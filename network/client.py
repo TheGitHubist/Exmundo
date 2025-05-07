@@ -105,7 +105,7 @@ class GameClient:
                 debug(f"Turn changed to player {self.current_player}",False)
         except json.JSONDecodeError:
             if message == "Game started":
-                debug("Game has started!",True)
+                debug("Game has started!",False)
                 self.game_started = True
                 # Wait a bit longer to ensure player number is set
                 await asyncio.sleep(1.0)
@@ -149,7 +149,7 @@ class GameClient:
 
     async def draw_initial_cards(self, writer):
         """Draw 5 cards for each player at game start"""
-        if self.initial_cards_drawn is False:
+        if self.initial_cards_drawn is :
             debug(f"Skipping initial card draw - drawn: {self.initial_cards_drawn}, player: {self.player_number}",True)
             return
             
