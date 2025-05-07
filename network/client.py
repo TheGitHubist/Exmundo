@@ -19,6 +19,7 @@ class GameClient:
         self.deck_choice = 0
         self.host = host
         self.port = port
+        self.player_number = None
         self.current_player = 1
         self.drawn_cards = {}  # Store drawn cards for both players
         self.last_draw_time = 0  # For animation
@@ -149,8 +150,8 @@ class GameClient:
 
     async def draw_initial_cards(self, writer):
         """Draw 5 cards for each player at game start"""
-        if self.initial_cards_drawn is :
-            debug(f"Skipping initial card draw - drawn: {self.initial_cards_drawn}, player: {self.player_number}",True)
+        if self.initial_cards_drawn or self.player_number is None:
+            debug(f"Skipping initial card draw - drawn: {self.initial_cards_drawn}, player: {self.player_number}",False)
             return
             
         debug(f"Starting initial card draw for player {self.player_number}",False)
