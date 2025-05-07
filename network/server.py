@@ -179,7 +179,7 @@ class GameServer:
         await self.disconnect(reader, writer)
 
 async def main():
-    await debug("Testing",True)
+    await debug("Testing")
     game_server = GameServer()
     server = await asyncio.start_server(game_server.handle_client_msg, '', port)
     
