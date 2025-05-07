@@ -80,7 +80,7 @@ class GameClient(Screen):
                 self.stop()
 
         elif message[0] == "106":
-            self.handle_input(writer)
+            await self.handle_input(writer)
         elif message[0] == "110":
             if message[1] == self.version:
                 writer.write(read_message(0,'Update Yes').encode())
