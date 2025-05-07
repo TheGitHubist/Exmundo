@@ -6,7 +6,6 @@ import asyncio
 import time
 import pygame
 import json
-import re
 from pathlib import Path
 
 from game.deck import PlayerDeck as Player
@@ -122,6 +121,7 @@ class GameClient:
                 debug("Player disconnected",False)
                 self.running = False
             elif message.startswith("Player"):
+                import re
                 try:
                     # Extract leading digits from the second word after "Player"
                     player_str = message.split()[1]
